@@ -1,8 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import styles from './Navbar.module.css';
 
-export const Navbar = ({ onOpenAuth }) => {
+export const Navbar = () => {
+  const { user, logout, openAuthModal } = useAuth();
+
   return (
     <header className={styles.header}>
       <div className={styles.container}>
@@ -51,12 +54,25 @@ export const Navbar = ({ onOpenAuth }) => {
         </nav>
 
         <div className={styles.actions}>
-          <button className={styles.btnSecondary} onClick={() => onOpenAuth?.('login')}>
-            Entrar
-          </button>
-          <button className={styles.btnPrimary} onClick={() => onOpenAuth?.('register')}>
-            Criar Conta
-          </button>
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+              <NavLink to="/biblioteca" className={styles.btnSecondary}>
+                👤 {user.displayName || user.email?.split('@')[0] || 'Usuário'}
+              </NavLink>
+              <button className={styles.btnSecondary} onClick={logout}>
+                Sair
+              </button>
+            </div>
+          ) : (
+            <>
+              <button className={styles.btnSecondary} onClick={() => openAuthModal('login')}>
+                Entrar
+              </button>
+              <button className={styles.btnPrimary} onClick={() => openAuthModal('register')}>
+                Criar Conta
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
