@@ -1,0 +1,111 @@
+.summaryWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding-left: 1rem;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1.15;
+}
+
+.synopsis {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 1rem;
+  font-size: 0.82rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 1.5rem;
+}
+
+.metaLabel {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.metaValue {
+  color: var(--text-primary);
+}
+
+.buyBox {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.priceInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.price {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.priceSub {
+  font-size: 0.75rem;
+  color: var(--accent-terracotta);
+}
+
+.btnAcquire {
+  padding: 0.75rem 1.4rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--accent-terracotta);
+  border: 1px solid var(--accent-terracotta);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btnAcquire:hover {
+  background-color: var(--accent-terracotta-hover);
+}
+
+@media (max-width: 960px) {
+  .summaryWrapper {
+    padding-left: 0;
+    margin-top: 1.5rem;
+  }
+}

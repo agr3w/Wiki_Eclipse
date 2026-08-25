@@ -6,6 +6,7 @@ import { ScrollToTop } from './components/layout/ScrollToTop';
 
 const Home = lazy(() => import('./pages/public/Home').then(m => ({ default: m.Home || m.default })));
 const Wiki = lazy(() => import('./pages/public/Wiki').then(m => ({ default: m.Wiki || m.default })));
+const Store = lazy(() => import('./pages/public/Store').then(m => ({ default: m.Store || m.default })));
 
 const LoadingFallback = () => (
   <div style={{
@@ -33,6 +34,7 @@ export const AppRouter = () => {
           <Route path="/wiki" element={<Wiki />} />
           <Route path="/wiki/:categoryId" element={<Wiki />} />
           <Route path="/wiki/:categoryId/:topicId" element={<Wiki />} />
+          <Route path="/loja" element={<Store />} />
         </Routes>
       </Suspense>
       <Footer />

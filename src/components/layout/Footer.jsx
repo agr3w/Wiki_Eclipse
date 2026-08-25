@@ -42,7 +42,7 @@ export const Footer = () => {
       </div>
 
       <div className={styles.bottomBar}>
-        <span>© 2026 The Wavem Collective • Licença Acadêmica Aberta</span>
+        <span>© 2026 • Licença Acadêmica Aberta</span>
         <span>Jira & Confluence Gov • Godot 4.7.1</span>
       </div>
     </footer>
