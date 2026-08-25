@@ -212,22 +212,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const claimGameLicense = async () => {
-    if (!user) return false;
+  const claimGameLicense = async (checkoutData = {}) => {
+    if (!user) return null;
     
+    const orderProtocol = `ECL-${Date.now().toString().slice(-6)}`;
+    const purchaseRecord = {
+      orderProtocol,
+      userId: user.uid,
+      userEmail: user.email,
+      gameId: 'eclipse-ecos-do-abismo',
+      gameTitle: 'Eclipse: Ecos do Abismo',
+      price: 'R$ 0,00',
+      paymentMethod: checkoutData.paymentMethod || 'pix_mock',
+      billingName: checkoutData.billingName || user.displayName || user.email?.split('@')[0],
+      invoiceRecipientEmail: user.email,
+      status: 'completed',
+      acquiredAt: new Date().toISOString()
+    };
+
     if (isFirebaseConfigured && auth?.currentUser && db) {
       try {
         await addDoc(collection(db, 'purchases'), {
-          userId: user.uid,
-          gameId: 'eclipse-ecos-do-abismo',
-          title: 'Eclipse: Ecos do Abismo',
-          price: 'R$ 0,00',
-          status: 'completed',
+          ...purchaseRecord,
           acquiredAt: serverTimestamp()
         });
         await updateDoc(doc(db, 'users', user.uid), { hasLicense: true });
       } catch (err) {
-        console.warn('Simulando licença localmente:', err);
+        console.warn('Simulando persistência local de compra:', err);
       }
     }
 
@@ -245,7 +256,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     setUser(prev => ({ ...prev, hasLicense: true }));
-    return true;
+    return purchaseRecord;
   };
 
   const openAuthModal = (mode = 'login') => {

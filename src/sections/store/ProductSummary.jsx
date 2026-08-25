@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './ProductSummary.module.css';
 
 export const ProductSummary = ({ game, onAcquire, hasLicense }) => {
+  const navigate = useNavigate();
+
   return (
     <div className={styles.summaryWrapper}>
       <div>
@@ -32,11 +35,24 @@ export const ProductSummary = ({ game, onAcquire, hasLicense }) => {
       <div className={styles.buyBox}>
         <div className={styles.priceInfo}>
           <span className={styles.price}>{game.price}</span>
-          <span className={styles.priceSub}>{game.priceLabel}</span>
+          <span className={styles.priceSub}>
+            {hasLicense ? 'Licença Ativa na Conta' : game.priceLabel}
+          </span>
         </div>
-        <button className={styles.btnAcquire} onClick={onAcquire}>
-          {hasLicense ? 'Na Biblioteca (Acessar)' : 'Adquirir Licença'}
-        </button>
+
+        {hasLicense ? (
+          <button 
+            className={styles.btnAcquire} 
+            style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border-active)' }}
+            onClick={() => navigate('/biblioteca')}
+          >
+            Você já possui este jogo • Acessar Download →
+          </button>
+        ) : (
+          <button className={styles.btnAcquire} onClick={onAcquire}>
+            Adquirir Licença
+          </button>
+        )}
       </div>
     </div>
   );

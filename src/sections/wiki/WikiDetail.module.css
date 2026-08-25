@@ -23,7 +23,7 @@
 
 /* Scrollbar fina, estilizada e discreta */
 .sidebar::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .sidebar::-webkit-scrollbar-track {
@@ -32,11 +32,11 @@
 
 .sidebar::-webkit-scrollbar-thumb {
   background-color: var(--border-default);
-  border-radius: 4px;
+  border-radius: var(--radius-full);
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--border-active);
+  background-color: var(--accent-terracotta);
 }
 
 .backButton {

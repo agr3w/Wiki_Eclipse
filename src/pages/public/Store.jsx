@@ -7,26 +7,21 @@ import { MediaGallery } from '../../sections/store/MediaGallery';
 import { ProductSummary } from '../../sections/store/ProductSummary';
 import { PatchNoteModal } from '../../sections/store/PatchNoteModal';
 import { DiscussionSection } from '../../sections/store/DiscussionSection';
+import { CheckoutModal } from '../../components/checkout/CheckoutModal';
 import styles from './Store.module.css';
 
 export const Store = () => {
-  const { user, openAuthModal, claimGameLicense } = useAuth();
+  const { user, openAuthModal } = useAuth();
   const [selectedPatch, setSelectedPatch] = useState(null);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleAcquire = async () => {
+  const handleOpenCheckout = () => {
     if (!user) {
       openAuthModal('login');
       return;
     }
-
-    if (user.hasLicense) {
-      navigate('/biblioteca');
-      return;
-    }
-
-    await claimGameLicense();
-    navigate('/biblioteca');
+    setIsCheckoutOpen(true);
   };
 
   return (
@@ -37,7 +32,7 @@ export const Store = () => {
           <MediaGallery items={GAME_DETAILS.gallery} />
           <ProductSummary 
             game={GAME_DETAILS} 
-            onAcquire={handleAcquire}
+            onAcquire={handleOpenCheckout}
             hasLicense={user?.hasLicense}
           />
         </section>
@@ -164,6 +159,13 @@ export const Store = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Modal de Checkout Seguro */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        onComplete={() => navigate('/biblioteca')}
+      />
     </div>
   );
 };
