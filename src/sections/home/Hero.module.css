@@ -1,0 +1,127 @@
+.heroWrapper {
+  position: relative;
+  min-height: calc(100vh - 68px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  overflow: hidden;
+}
+
+.backgroundOverlay {
+  position: absolute;
+  inset: 0;
+  background-image: url('/document/image.png');
+  background-size: cover;
+  background-position: center;
+  filter: blur(14px) brightness(0.28);
+  transform: scale(1.05);
+  z-index: 0;
+}
+
+.backgroundGradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(191, 87, 59, 0.08), transparent 60%),
+              linear-gradient(to bottom, transparent, var(--bg-main) 95%);
+  z-index: 1;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  max-width: 780px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-full);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  margin-bottom: 2rem;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--accent-terracotta);
+  border-radius: 50%;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 5vw, 4.2rem);
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  color: var(--accent-terracotta);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 1.75rem;
+}
+
+.description {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 620px;
+  margin-bottom: 2.5rem;
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ctaPrimary {
+  padding: 0.75rem 1.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--accent-terracotta);
+  border: 1px solid var(--accent-terracotta);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background-color var(--transition-smooth);
+}
+
+.ctaPrimary:hover {
+  background-color: var(--accent-terracotta-hover);
+}
+
+.ctaSecondary {
+  padding: 0.75rem 1.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: all var(--transition-smooth);
+}
+
+.ctaSecondary:hover {
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  background-color: var(--bg-surface-hover);
+}

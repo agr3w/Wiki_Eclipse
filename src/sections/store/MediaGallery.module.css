@@ -1,0 +1,70 @@
+.galleryWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mainDisplay {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.mainImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.captionOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(to top, rgba(17, 16, 15, 0.95), transparent);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.thumbnailRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.thumbnailBtn {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color var(--transition-fast), opacity var(--transition-fast);
+  opacity: 0.65;
+}
+
+.thumbnailBtn:hover {
+  opacity: 1;
+  border-color: var(--border-active);
+}
+
+.activeThumbnail {
+  opacity: 1;
+  border-color: var(--accent-terracotta);
+  box-shadow: 0 0 8px var(--accent-terracotta-subtle);
+}
+
+.thumbnailImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

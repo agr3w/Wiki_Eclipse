@@ -1,0 +1,101 @@
+.settingsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.block {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+}
+
+.blockHeader {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.blockTitle {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 480px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.input {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: border-color var(--transition-fast);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent-terracotta);
+}
+
+.inputDisabled {
+  background-color: rgba(17, 16, 15, 0.4);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.feedbackMsg {
+  font-size: 0.82rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+.feedbackSuccess {
+  color: #81c784;
+  background-color: rgba(129, 199, 132, 0.1);
+  border: 1px solid rgba(129, 199, 132, 0.25);
+}
+
+.feedbackError {
+  color: #e57373;
+  background-color: rgba(229, 115, 115, 0.1);
+  border: 1px solid rgba(229, 115, 115, 0.25);
+}
+
+.btnSubmit {
+  align-self: flex-start;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btnSubmit:hover:not(:disabled) {
+  border-color: var(--accent-terracotta);
+  color: var(--accent-terracotta);
+}
