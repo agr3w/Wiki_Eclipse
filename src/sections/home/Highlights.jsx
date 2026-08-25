@@ -8,21 +8,21 @@ const highlights = [
     tag: 'Mecânicas de Ação',
     title: 'Combate e Movimento Fluido',
     description: 'Enfrente sentinelas armadas com a Lâmina Solar. Execute saltos precisos, esquivas dinâmicas e controle sua estamina contra inimigos terrestres e aéreos.',
-    link: '/wiki?tab=mecanicas',
+    link: '/wiki/mecanicas',
     linkText: 'Ver Controles & HUD'
   },
   {
     tag: 'Level Design & Parallax',
     title: 'Metrópole Vertical 2D',
     description: 'Explore camadas industriais suspensas com cenários de múltiplos planos em parallax, projetados com precisão pixel a pixel no motor Godot.',
-    link: '/wiki?tab=cenarios',
+    link: '/wiki/cenarios',
     linkText: 'Explorar Cenários'
   },
   {
     tag: 'Ameaças do Abismo',
     title: 'Guardiões & Chefes Únicos',
     description: 'Estude o padrão de ataque do Guardião da Tocha, dos Espectros voadores e prepare-se para a batalha em fases contra o Arauto do Eclipse.',
-    link: '/wiki?tab=inimigos',
+    link: '/wiki/inimigos',
     linkText: 'Catálogo de Inimigos'
   }
 ];

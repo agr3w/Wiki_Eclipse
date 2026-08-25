@@ -1,0 +1,172 @@
+.hubWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 4rem auto;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-terracotta);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.description {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.categoryCard {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transition-smooth), transform var(--transition-smooth), background-color var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+.categoryCard:hover {
+  border-color: var(--border-active);
+  background-color: var(--bg-surface-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.cardTop {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardBadge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-terracotta);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+}
+
+/* Container central de destaque do ícone */
+.iconWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.5rem 0 2rem 0;
+}
+
+.iconBox {
+  width: 88px;
+  height: 88px;
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-terracotta);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  transition: transform var(--transition-smooth), border-color var(--transition-smooth), color var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+.categoryCard:hover .iconBox {
+  transform: scale(1.08);
+  border-color: var(--accent-terracotta);
+  color: var(--accent-amber);
+  box-shadow: 0 0 28px rgba(191, 87, 59, 0.25);
+}
+
+.cardTitle {
+  font-family: var(--font-serif);
+  font-size: 1.7rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.cardDescription {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.subtopicsList {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.subtopicItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+
+.categoryCard:hover .subtopicItem {
+  color: var(--text-secondary);
+}
+
+.subtopicBullet {
+  width: 4px;
+  height: 4px;
+  background-color: var(--accent-terracotta);
+  border-radius: 50%;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--accent-terracotta);
+  margin-top: 1.75rem;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.categoryCard:hover .cardFooter {
+  color: var(--accent-amber);
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}

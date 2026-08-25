@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
+import { ScrollToTop } from './components/layout/ScrollToTop';
 
 const Home = lazy(() => import('./pages/public/Home').then(m => ({ default: m.Home || m.default })));
 const Wiki = lazy(() => import('./pages/public/Wiki').then(m => ({ default: m.Wiki || m.default })));
@@ -24,6 +25,7 @@ const LoadingFallback = () => (
 export const AppRouter = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Navbar onOpenAuth={(mode) => console.log('Auth modal:', mode)} />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
