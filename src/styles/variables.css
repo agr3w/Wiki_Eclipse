@@ -1,0 +1,52 @@
+:root {
+  /* Paleta Base - Eclipse Dusk */
+  --bg-main: #11100f;
+  --bg-surface: #191715;
+  --bg-surface-hover: #22201c;
+  --bg-elevated: #2b2824;
+
+  /* Bordas e Divisores */
+  --border-subtle: #2d2924;
+  --border-default: #3d3831;
+  --border-active: #5c544a;
+
+  /* Tipografia */
+  --text-primary: #f2eee6;
+  --text-secondary: #aba496;
+  --text-muted: #6e675b;
+
+  /* Acentos Sóbrios */
+  --accent-terracotta: #bf573b;
+  --accent-terracotta-hover: #a84b31;
+  --accent-terracotta-subtle: rgba(191, 87, 59, 0.12);
+  --accent-amber: #d99a4e;
+  --accent-void: #4a6fa5;
+
+  /* Tipografia e Raio */
+  --font-serif: 'Newsreader', 'Cinzel', 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Space Mono', monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Transições Padrão */
+  --transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
