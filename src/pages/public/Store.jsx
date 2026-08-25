@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
 import { GAME_DETAILS } from '../../data/storeData';
 import { MediaGallery } from '../../sections/store/MediaGallery';
 import { ProductSummary } from '../../sections/store/ProductSummary';
@@ -8,10 +10,23 @@ import { DiscussionSection } from '../../sections/store/DiscussionSection';
 import styles from './Store.module.css';
 
 export const Store = () => {
+  const { user, openAuthModal, claimGameLicense } = useAuth();
   const [selectedPatch, setSelectedPatch] = useState(null);
+  const navigate = useNavigate();
 
-  const handleAcquire = () => {
-    alert('Licença acadêmica adquirida com sucesso! Você já pode acessar a aba Biblioteca para efetuar o download.');
+  const handleAcquire = async () => {
+    if (!user) {
+      openAuthModal('login');
+      return;
+    }
+
+    if (user.hasLicense) {
+      navigate('/biblioteca');
+      return;
+    }
+
+    await claimGameLicense();
+    navigate('/biblioteca');
   };
 
   return (
@@ -20,7 +35,11 @@ export const Store = () => {
         {/* Top Showcase: Galeria + Resumo de Compra */}
         <section className={styles.showcaseGrid}>
           <MediaGallery items={GAME_DETAILS.gallery} />
-          <ProductSummary game={GAME_DETAILS} onAcquire={handleAcquire} />
+          <ProductSummary 
+            game={GAME_DETAILS} 
+            onAcquire={handleAcquire}
+            hasLicense={user?.hasLicense}
+          />
         </section>
 
         {/* Sobre o Jogo & Recursos */}

@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './ProductSummary.module.css';
 
-export const ProductSummary = ({ game, onAcquire }) => {
+export const ProductSummary = ({ game, onAcquire, hasLicense }) => {
   return (
     <div className={styles.summaryWrapper}>
       <div>
@@ -35,7 +35,7 @@ export const ProductSummary = ({ game, onAcquire }) => {
           <span className={styles.priceSub}>{game.priceLabel}</span>
         </div>
         <button className={styles.btnAcquire} onClick={onAcquire}>
-          Adquirir Licença
+          {hasLicense ? 'Na Biblioteca (Acessar)' : 'Adquirir Licença'}
         </button>
       </div>
     </div>

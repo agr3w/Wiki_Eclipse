@@ -9,6 +9,7 @@ import { AuthModal } from './components/auth/AuthModal';
 const Home = lazy(() => import('./pages/public/Home').then(m => ({ default: m.Home || m.default })));
 const Wiki = lazy(() => import('./pages/public/Wiki').then(m => ({ default: m.Wiki || m.default })));
 const Store = lazy(() => import('./pages/public/Store').then(m => ({ default: m.Store || m.default })));
+const Profile = lazy(() => import('./pages/public/Profile').then(m => ({ default: m.Profile || m.default })));
 
 const LoadingFallback = () => (
   <div style={{
@@ -39,6 +40,8 @@ export const AppRouter = () => {
             <Route path="/wiki/:categoryId" element={<Wiki />} />
             <Route path="/wiki/:categoryId/:topicId" element={<Wiki />} />
             <Route path="/loja" element={<Store />} />
+            <Route path="/biblioteca" element={<Profile />} />
+            <Route path="/perfil" element={<Profile />} />
           </Routes>
         </Suspense>
         <Footer />
