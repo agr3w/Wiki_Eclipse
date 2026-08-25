@@ -1,0 +1,124 @@
+.loaderWrapper {
+  min-height: 70vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  background-color: var(--bg-main);
+}
+
+/* Arena do Eclipse */
+.eclipseContainer {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Coroa Solar (Sol / Luz de Fundo) */
+.sunCorona {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f2eee6 20%, var(--accent-amber) 60%, var(--accent-terracotta) 100%);
+  box-shadow: 
+    0 0 24px rgba(217, 154, 78, 0.4),
+    0 0 48px rgba(191, 87, 59, 0.25);
+  animation: coronaPulse 3.6s ease-in-out infinite alternate;
+}
+
+/* Anel Externo de Difusão */
+.coronaRing {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1px solid rgba(217, 154, 78, 0.25);
+  animation: ringRotate 12s linear infinite;
+}
+
+/* Corpo Lunar (A Sombra do Abismo) */
+.moonDisc {
+  position: absolute;
+  width: 63px;
+  height: 63px;
+  border-radius: 50%;
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  animation: eclipseTransit 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+/* Tipografia e Status */
+.statusContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.statusText {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.statusSubtitle {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
+/* Keyframes de Animação */
+@keyframes eclipseTransit {
+  0% {
+    transform: translateX(-56px);
+    box-shadow: inset -6px 0 10px rgba(0, 0, 0, 0.8);
+  }
+  50% {
+    transform: translateX(0px);
+    box-shadow: 
+      inset 0 0 12px rgba(0, 0, 0, 0.95),
+      0 0 16px rgba(191, 87, 59, 0.5);
+  }
+  100% {
+    transform: translateX(56px);
+    box-shadow: inset 6px 0 10px rgba(0, 0, 0, 0.8);
+  }
+}
+
+@keyframes coronaPulse {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.85;
+    box-shadow: 0 0 20px rgba(217, 154, 78, 0.3);
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+    box-shadow: 
+      0 0 36px rgba(217, 154, 78, 0.55),
+      0 0 64px rgba(191, 87, 59, 0.35);
+  }
+  100% {
+    transform: scale(0.96);
+    opacity: 0.85;
+    box-shadow: 0 0 20px rgba(217, 154, 78, 0.3);
+  }
+}
+
+@keyframes ringRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

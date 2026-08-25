@@ -5,26 +5,12 @@ import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 import { AuthModal } from './components/auth/AuthModal';
+import { EclipseLoader } from './components/ui/EclipseLoader';
 
 const Home = lazy(() => import('./pages/public/Home').then(m => ({ default: m.Home || m.default })));
 const Wiki = lazy(() => import('./pages/public/Wiki').then(m => ({ default: m.Wiki || m.default })));
 const Store = lazy(() => import('./pages/public/Store').then(m => ({ default: m.Store || m.default })));
 const Profile = lazy(() => import('./pages/public/Profile').then(m => ({ default: m.Profile || m.default })));
-
-const LoadingFallback = () => (
-  <div style={{
-    minHeight: '60vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'var(--text-muted)',
-    fontFamily: 'var(--font-mono)',
-    fontSize: '0.85rem',
-    letterSpacing: '0.1em'
-  }}>
-    CARREGANDO SETOR...
-  </div>
-);
 
 export const AppRouter = () => {
   return (
@@ -33,7 +19,7 @@ export const AppRouter = () => {
         <ScrollToTop />
         <Navbar />
         <AuthModal />
-        <Suspense fallback={<LoadingFallback />}>
+        <Suspense fallback={<EclipseLoader />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/wiki" element={<Wiki />} />
