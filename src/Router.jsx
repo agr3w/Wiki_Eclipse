@@ -1,11 +1,19 @@
 import React from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import { Navbar } from "./components/layout/Navbar";
 import Home from "./pages/public/Home";
 
 export default function Router() {
+  const handleOpenAuth = (mode) => {
+    console.log(`Abrir autenticação: ${mode}`);
+  };
+
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-    </Routes>
+    <>
+      <Navbar onOpenAuth={handleOpenAuth} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </>
   );
 }

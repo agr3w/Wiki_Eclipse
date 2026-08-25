@@ -1,18 +1,18 @@
 import React from 'react';
-import { Navbar } from '../../components/layout/Navbar';
 import { Hero } from '../../sections/home/Hero';
+import { Synopsis } from '../../sections/home/Synopsis';
+import { Highlights } from '../../sections/home/Highlights';
+import { CtaBanner } from '../../sections/home/CtaBanner';
 
-export default function Home() {
-  const handleOpenAuth = (mode) => {
-    console.log(`Abrir modal de autenticação: ${mode}`);
-  };
-
+export const Home = () => {
   return (
-    <div className="min-h-screen">
-      <Navbar onOpenAuth={handleOpenAuth} />
-      <main>
-        <Hero />
-      </main>
-    </div>
+    <main>
+      <Hero />
+      <Synopsis />
+      <Highlights />
+      <CtaBanner />
+    </main>
   );
-}
+};
+
+export default Home;
