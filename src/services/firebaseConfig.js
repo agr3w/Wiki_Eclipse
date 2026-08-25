@@ -26,12 +26,12 @@ export const isFirebaseConfigured = Boolean(
 );
 
 const firebaseConfig = {
-  apiKey: apiKey || "AIzaSyMockKeyForAcademicProject",
-  authDomain: authDomain || "eclipse-ecos-do-abismo.firebaseapp.com",
-  projectId: projectId || "eclipse-ecos-do-abismo",
-  storageBucket: storageBucket || "eclipse-ecos-do-abismo.appspot.com",
-  messagingSenderId: messagingSenderId || "1234567890",
-  appId: appId || "1:1234567890:web:abcdef123456"
+  apiKey: apiKey,
+  authDomain: authDomain,
+  projectId: projectId,
+  storageBucket: storageBucket,
+  messagingSenderId: messagingSenderId,
+  appId: appId
 };
 
 let app = null;

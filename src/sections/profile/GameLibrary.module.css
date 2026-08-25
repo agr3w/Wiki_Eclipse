@@ -1,17 +1,17 @@
 .libraryWrapper {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
-/* Card do Jogo Liberado */
+/* Card Principal do Game */
 .gameCard {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   overflow: hidden;
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 340px 1fr;
   transition: border-color var(--transition-fast);
 }
 
@@ -33,7 +33,7 @@
 }
 
 .cardBody {
-  padding: 2rem;
+  padding: 2.25rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -49,7 +49,7 @@
 
 .gameTitle {
   font-family: var(--font-serif);
-  font-size: 1.6rem;
+  font-size: 1.65rem;
   font-weight: 500;
   color: var(--text-primary);
 }
@@ -68,23 +68,77 @@
 }
 
 .gameMeta {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }
 
+/* Seletor de Plataforma */
+.platformSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.platformLabel {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-right: 0.5rem;
+}
+
+.platformBtn {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.platformBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-active);
+}
+
+.activePlatform {
+  color: var(--accent-terracotta);
+  border-color: var(--accent-terracotta);
+  background-color: var(--accent-terracotta-subtle);
+  font-weight: 600;
+}
+
+/* Painel de Download e Segurança */
 .cardFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border-subtle);
+  gap: 1rem;
+}
+
+.securityNote {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .buildInfo {
   font-family: var(--font-mono);
   font-size: 0.78rem;
+  color: var(--text-primary);
+}
+
+.shaInfo {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   color: var(--text-muted);
 }
 
@@ -92,23 +146,74 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.65rem 1.4rem;
-  font-size: 0.88rem;
+  padding: 0.75rem 1.6rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-primary);
   background-color: var(--accent-terracotta);
   border: 1px solid var(--accent-terracotta);
   border-radius: var(--radius-sm);
-  text-decoration: none;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
-.btnDownload:hover {
+.btnDownload:hover:not(:disabled) {
   background-color: var(--accent-terracotta-hover);
 }
 
-/* Empty State */
+.btnDownload:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Guia de Instalação e Execução */
+.guideBox {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+}
+
+.guideTitle {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.guideSteps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stepItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.stepNumber {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-terracotta);
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-default);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Empty State / Bloqueio */
 .emptyState {
   padding: 5rem 2rem;
   background-color: var(--bg-surface);
@@ -154,5 +259,13 @@
 @media (max-width: 860px) {
   .gameCard {
     grid-template-columns: 1fr;
+  }
+  .cardFooter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btnDownload {
+    width: 100%;
+    justify-content: center;
   }
 }

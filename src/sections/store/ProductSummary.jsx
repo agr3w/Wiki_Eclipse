@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import styles from './ProductSummary.module.css';
 
 export const ProductSummary = ({ game, onAcquire, hasLicense }) => {
@@ -43,14 +45,32 @@ export const ProductSummary = ({ game, onAcquire, hasLicense }) => {
         {hasLicense ? (
           <button 
             className={styles.btnAcquire} 
-            style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border-active)' }}
+            style={{ 
+              backgroundColor: 'var(--bg-elevated)', 
+              borderColor: 'var(--border-active)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem'
+            }}
             onClick={() => navigate('/biblioteca')}
           >
-            Você já possui este jogo • Acessar Download →
+            <CheckCircleOutlineIcon style={{ fontSize: '1.1rem', color: '#81c784' }} />
+            <span>Você já possui este jogo • Acessar Download →</span>
           </button>
         ) : (
-          <button className={styles.btnAcquire} onClick={onAcquire}>
-            Adquirir Licença
+          <button 
+            className={styles.btnAcquire} 
+            onClick={onAcquire}
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '0.45rem' 
+            }}
+          >
+            <ShoppingCartOutlinedIcon style={{ fontSize: '1.1rem' }} />
+            <span>Adquirir Licença</span>
           </button>
         )}
       </div>

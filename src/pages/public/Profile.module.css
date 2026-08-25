@@ -1,7 +1,7 @@
 .pageWrapper {
   min-height: calc(100vh - 68px);
   background-color: var(--bg-main);
-  padding: 4.5rem 1.5rem 6rem 1.5rem;
+  padding: 4rem 1.5rem 6rem 1.5rem;
 }
 
 .container {
@@ -9,31 +9,118 @@
   margin: 0 auto;
 }
 
-.header {
+/* Header Card com Avatar do Eclipse */
+.headerCard {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 2rem 2.25rem;
   margin-bottom: 2.5rem;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+.headerCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--accent-terracotta), var(--accent-amber));
+}
+
+.profileInfoLeft {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.eclipseAvatarLarge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: conic-gradient(from 180deg at 50% 50%, #bf573b 0deg, #d99a4e 120deg, #11100f 260deg, #bf573b 360deg);
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(191, 87, 59, 0.3);
+  flex-shrink: 0;
+}
+
+.avatarInnerLarge {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-main);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--accent-terracotta);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 0.35rem;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.25rem;
 }
 
 .title {
   font-family: var(--font-serif);
-  font-size: 2.25rem;
+  font-size: 1.85rem;
   font-weight: 500;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
+.userEmailSub {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.licensePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.licenseActive {
+  color: #81c784;
+  background-color: rgba(129, 199, 132, 0.12);
+  border: 1px solid rgba(129, 199, 132, 0.3);
+}
+
+.licensePending {
+  color: var(--accent-amber);
+  background-color: rgba(217, 154, 78, 0.1);
+  border: 1px solid rgba(217, 154, 78, 0.25);
+}
+
+/* Abas de Navegação */
 .tabRow {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   margin-bottom: 2.5rem;
   border-bottom: 1px solid var(--border-default);
 }
@@ -42,22 +129,40 @@
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 0.75rem 0.5rem;
+  padding: 0.85rem 0.25rem;
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
   margin-bottom: -1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tabBtn svg {
+  font-size: 1.15rem;
+  opacity: 0.7;
 }
 
 .tabBtn:hover {
   color: var(--text-primary);
 }
 
+.tabBtn:hover svg {
+  opacity: 1;
+  color: var(--accent-terracotta);
+}
+
 .activeTab {
   color: var(--accent-terracotta);
   border-bottom-color: var(--accent-terracotta);
+}
+
+.activeTab svg {
+  opacity: 1;
+  color: var(--accent-terracotta);
 }
 
 /* Gate de Acesso Não-Autenticado */
@@ -99,4 +204,11 @@
 
 .btnAuth:hover {
   background-color: var(--accent-terracotta-hover);
+}
+
+@media (max-width: 768px) {
+  .headerCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
