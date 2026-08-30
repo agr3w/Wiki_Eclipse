@@ -118,10 +118,42 @@ export const AuthProvider = ({ children }) => {
 
   const claimGameLicense = async (checkoutData = {}) => {
     if (!user) return null;
-    
-    const orderProtocol = `ECL-${Date.now().toString().slice(-6)}`;
-    const purchaseRecord = {
-      orderProtocol,
+
+    const orderId = `ECL-${Date.now().toString().slice(-6)}`;
+    const orderRecord = {
+      order_id: orderId,
+      user_id: user.uid,
+      gameId: 'eclipse-ecos-do-abismo',
+      status: 'completed',
+      amount: 0,
+      purchasedAt: serverTimestamp(),
+      paymentMethod: checkoutData.paymentMethod || 'pix',
+      billingName: checkoutData.billingName || user.displayName || user.email?.split('@')[0],
+      userEmail: user.email,
+      gameTitle: 'Eclipse: Ecos do Abismo'
+    };
+
+    if (db) {
+      await setDoc(doc(db, 'orders', orderId), orderRecord, { merge: true });
+
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || checkoutData.billingName || '',
+        hasLicense: true,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      await addDoc(collection(db, 'purchases'), {
+        ...orderRecord,
+        acquiredAt: serverTimestamp(),
+        legacy: true
+      }).catch(() => undefined);
+    }
+
+    setUser(prev => ({ ...prev, hasLicense: true }));
+    return {
+      orderProtocol: orderId,
       userId: user.uid,
       userEmail: user.email,
       gameId: 'eclipse-ecos-do-abismo',
@@ -133,25 +165,6 @@ export const AuthProvider = ({ children }) => {
       status: 'completed',
       acquiredAt: new Date().toISOString()
     };
-
-    if (db) {
-      // 1. Gravar registro permanente da transação na coleção 'purchases'
-      await addDoc(collection(db, 'purchases'), {
-        ...purchaseRecord,
-        acquiredAt: serverTimestamp()
-      });
-
-      // 2. Atualizar ou criar status hasLicense: true no documento 'users/{uid}' com merge: true
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName || checkoutData.billingName || '',
-        hasLicense: true
-      }, { merge: true });
-    }
-
-    setUser(prev => ({ ...prev, hasLicense: true }));
-    return purchaseRecord;
   };
 
   const openAuthModal = (mode = 'login') => {

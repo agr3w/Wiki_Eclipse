@@ -1,98 +1,271 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc
+} from 'firebase/firestore';
+import { useAuth } from '../../context/AuthContext';
+import { db, isFirebaseConfigured } from '../../services/firebaseConfig';
 import styles from './DiscussionSection.module.css';
 
+const formatFirestoreDate = (value) => {
+  if (!value || typeof value === 'object' && value._methodName === 'serverTimestamp') {
+    return 'Agora mesmo';
+  }
+
+  if (typeof value?.toDate === 'function') {
+    return value.toDate().toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  if (value instanceof Date) {
+    return value.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  return 'Agora mesmo';
+};
+
+const normalizeDiscussion = (item) => {
+  const replies = Array.isArray(item.replies) ? item.replies.map((reply) => ({
+    id: reply.id || reply.comment_id || `r-${Date.now()}-${Math.random()}`,
+    author: reply.authorName || reply.author || 'Jogador',
+    avatar: (reply.authorName || reply.author || 'J').charAt(0).toUpperCase(),
+    date: formatFirestoreDate(reply.createdAt),
+    message: reply.content || reply.message || ''
+  })) : [];
+
+  return {
+    id: item.comment_id || item.id || `d-${Date.now()}-${Math.random()}`,
+    author: item.authorName || item.author || 'Jogador_Convidado',
+    avatar: (item.authorName || item.author || 'J').charAt(0).toUpperCase(),
+    date: formatFirestoreDate(item.createdAt),
+    title: item.title || 'Discussão',
+    message: item.content || item.message || '',
+    upvotes: Number(item.rating ?? item.upvotes ?? 0),
+    userUpvoted: Boolean(item.userUpvoted),
+    reported: Boolean(item.reported),
+    replies
+  };
+};
+
 export const DiscussionSection = ({ initialDiscussions }) => {
-  const [discussions, setDiscussions] = useState(initialDiscussions || []);
+  const { user } = useAuth();
+  const [discussions, setDiscussions] = useState(Array.isArray(initialDiscussions) ? initialDiscussions : []);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
-
-  // Estado para controlar qual discussão está sendo respondida
   const [replyingToId, setReplyingToId] = useState(null);
   const [replyMessage, setReplyMessage] = useState('');
 
-  // Publicar novo tópico principal
-  const handlePublishTopic = (e) => {
+  useEffect(() => {
+    if (!isFirebaseConfigured || !db) {
+      setDiscussions(Array.isArray(initialDiscussions) ? initialDiscussions : []);
+      return;
+    }
+
+    const loadDiscussions = async () => {
+      try {
+        const q = query(collection(db, 'discussions'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+          const loadedDiscussions = snapshot.docs.map((docItem) => normalizeDiscussion({
+            ...docItem.data(),
+            id: docItem.id,
+            comment_id: docItem.data().comment_id || docItem.id
+          }));
+          setDiscussions(loadedDiscussions);
+          return;
+        }
+      } catch (error) {
+        console.warn('Erro ao carregar discussões do Firestore:', error);
+      }
+
+      setDiscussions(Array.isArray(initialDiscussions) ? initialDiscussions : []);
+    };
+
+    loadDiscussions();
+  }, [initialDiscussions]);
+
+  const handlePublishTopic = async (e) => {
     e.preventDefault();
     if (!title.trim() || !message.trim()) return;
 
+    const discussionId = `d-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
     const newEntry = {
-      id: `d-${Date.now()}`,
-      author: 'Jogador_Convidado',
-      avatar: 'J',
-      date: 'Agora mesmo',
+      comment_id: discussionId,
+      user_id: user?.uid || 'guest',
+      authorName: user?.displayName || 'Jogador_Convidado',
       title,
-      message,
-      upvotes: 1,
+      content: message,
+      rating: 1,
       userUpvoted: true,
       reported: false,
+      createdAt: serverTimestamp(),
       replies: []
     };
 
-    setDiscussions([newEntry, ...discussions]);
+    if (isFirebaseConfigured && db) {
+      await setDoc(doc(db, 'discussions', discussionId), newEntry);
+    }
+
+    setDiscussions((prev) => [normalizeDiscussion(newEntry), ...prev]);
     setTitle('');
     setMessage('');
   };
 
-  // Curtir / Upvote estilo Reddit
-  const handleToggleUpvote = (discussionId) => {
-    setDiscussions(prev =>
-      prev.map(item => {
-        if (item.id === discussionId) {
-          const alreadyUpvoted = item.userUpvoted;
-          return {
-            ...item,
-            userUpvoted: !alreadyUpvoted,
-            upvotes: alreadyUpvoted ? item.upvotes - 1 : item.upvotes + 1
-          };
+  const handleToggleUpvote = async (discussionId) => {
+    const discussion = discussions.find((item) => item.id === discussionId);
+    if (!discussion) return;
+
+    const nextValue = !discussion.userUpvoted;
+    const nextRating = Math.max(0, discussion.upvotes + (nextValue ? 1 : -1));
+
+    setDiscussions((prev) => prev.map((item) => item.id === discussionId ? { ...item, userUpvoted: nextValue, upvotes: nextRating } : item));
+
+    if (isFirebaseConfigured && db) {
+      try {
+        const docRef = doc(db, 'discussions', discussionId);
+        const docSnapshot = await getDoc(docRef);
+
+        if (!docSnapshot.exists()) {
+          await setDoc(docRef, {
+            comment_id: discussionId,
+            user_id: user?.uid || 'guest',
+            authorName: discussion.author || 'Jogador_Convidado',
+            title: discussion.title || 'Discussão',
+            content: discussion.message || '',
+            rating: nextRating,
+            userUpvoted: nextValue,
+            reported: Boolean(discussion.reported),
+            createdAt: serverTimestamp(),
+            replies: discussion.replies || []
+          }, { merge: true });
+          return;
         }
-        return item;
-      })
-    );
+
+        await updateDoc(docRef, {
+          rating: nextRating,
+          userUpvoted: nextValue
+        });
+      } catch (error) {
+        console.warn('Erro ao atualizar upvote no Firestore:', error);
+      }
+    }
   };
 
-  // Enviar Resposta para um tópico específico
-  const handleSendReply = (discussionId) => {
+  const handleSendReply = async (discussionId) => {
     if (!replyMessage.trim()) return;
 
     const newReply = {
-      id: `r-${Date.now()}`,
-      author: 'Jogador_Convidado',
-      avatar: 'J',
-      date: 'Agora mesmo',
-      message: replyMessage
+      id: `r-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      comment_id: `r-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+      user_id: user?.uid || 'guest',
+      authorName: user?.displayName || 'Jogador_Convidado',
+      content: replyMessage,
+      createdAt: serverTimestamp(),
+      rating: 0
     };
 
-    setDiscussions(prev =>
-      prev.map(item => {
-        if (item.id === discussionId) {
-          return {
-            ...item,
-            replies: [...(item.replies || []), newReply]
-          };
+    setDiscussions((prev) => prev.map((item) => {
+      if (item.id !== discussionId) return item;
+      return {
+        ...item,
+        replies: [...(item.replies || []), {
+          id: newReply.id,
+          author: newReply.authorName,
+          avatar: newReply.authorName.charAt(0).toUpperCase(),
+          date: 'Agora mesmo',
+          message: newReply.content
+        }]
+      };
+    }));
+
+    if (isFirebaseConfigured && db) {
+      try {
+        const discussionRef = doc(db, 'discussions', discussionId);
+        const discussionSnapshot = await getDoc(discussionRef);
+
+        if (!discussionSnapshot.exists()) {
+          await setDoc(discussionRef, {
+            comment_id: discussionId,
+            user_id: user?.uid || 'guest',
+            authorName: 'Jogador_Convidado',
+            title: 'Discussão',
+            content: '',
+            rating: 0,
+            userUpvoted: false,
+            reported: false,
+            createdAt: serverTimestamp(),
+            replies: [newReply]
+          }, { merge: true });
+        } else {
+          const currentReplies = discussionSnapshot.data()?.replies || [];
+          await updateDoc(discussionRef, {
+            replies: [...currentReplies, newReply]
+          });
         }
-        return item;
-      })
-    );
+      } catch (error) {
+        console.warn('Erro ao persistir resposta no Firestore:', error);
+      }
+    }
 
     setReplyMessage('');
     setReplyingToId(null);
   };
 
-  // Denunciar Tópico
-  const handleReport = (discussionId) => {
-    setDiscussions(prev =>
-      prev.map(item => {
-        if (item.id === discussionId) {
-          return { ...item, reported: true };
+  const handleReport = async (discussionId) => {
+    setDiscussions((prev) => prev.map((item) => item.id === discussionId ? { ...item, reported: true } : item));
+
+    if (isFirebaseConfigured && db) {
+      try {
+        const discussionRef = doc(db, 'discussions', discussionId);
+        const discussionSnapshot = await getDoc(discussionRef);
+
+        if (!discussionSnapshot.exists()) {
+          await setDoc(discussionRef, {
+            comment_id: discussionId,
+            user_id: user?.uid || 'guest',
+            authorName: 'Jogador_Convidado',
+            title: 'Discussão',
+            content: '',
+            rating: 0,
+            userUpvoted: false,
+            reported: true,
+            createdAt: serverTimestamp(),
+            replies: []
+          }, { merge: true });
+        } else {
+          await updateDoc(discussionRef, { reported: true });
         }
-        return item;
-      })
-    );
+      } catch (error) {
+        console.warn('Erro ao registrar denúncia no Firestore:', error);
+      }
+    }
   };
 
   return (
     <div className={styles.discussionWrapper}>
-      {/* Formulário para Iniciar Nova Discussão */}
       <form className={styles.formBox} onSubmit={handlePublishTopic}>
         <input
           type="text"
@@ -112,22 +285,20 @@ export const DiscussionSection = ({ initialDiscussions }) => {
         </button>
       </form>
 
-      {/* Lista de Discussões com Interações */}
       <div className={styles.commentList}>
         {discussions.map((item) => (
           <div key={item.id} className={styles.commentItem}>
             <div className={styles.avatar}>{item.avatar}</div>
-            
+
             <div className={styles.commentBody}>
               <div className={styles.commentHeader}>
                 <span className={styles.author}>{item.author}</span>
                 <span className={styles.time}>{item.date}</span>
               </div>
-              
+
               <div className={styles.topicTitle}>{item.title}</div>
               <p className={styles.message}>{item.message}</p>
 
-              {/* Barra de Ações: Curtir, Comentar, Denunciar */}
               <div className={styles.actionsBar}>
                 <button
                   type="button"
@@ -155,7 +326,7 @@ export const DiscussionSection = ({ initialDiscussions }) => {
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                   </svg>
                   <span>
-                    {item.replies && item.replies.length > 0 
+                    {item.replies && item.replies.length > 0
                       ? `${item.replies.length} ${item.replies.length === 1 ? 'Resposta' : 'Respostas'}`
                       : 'Responder'}
                   </span>
@@ -176,7 +347,6 @@ export const DiscussionSection = ({ initialDiscussions }) => {
                 </button>
               </div>
 
-              {/* Caixa de Resposta Inline */}
               {replyingToId === item.id && (
                 <div className={styles.replyFormBox}>
                   <textarea
@@ -208,7 +378,6 @@ export const DiscussionSection = ({ initialDiscussions }) => {
                 </div>
               )}
 
-              {/* Lista de Respostas Aninhadas */}
               {item.replies && item.replies.length > 0 && (
                 <div className={styles.repliesTree}>
                   {item.replies.map((reply) => (
