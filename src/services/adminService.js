@@ -12,7 +12,7 @@ import {
   limit 
 } from 'firebase/firestore';
 import { db } from './firebaseConfig';
-import { GATEWAY_CONFIG, FINANCIAL_METRICS, RECENT_TRANSACTIONS, INVOICES_LEDGER } from '../data/adminFinancialData';
+import { GATEWAY_CONFIG, INVOICES_LEDGER } from '../data/adminFinancialData';
 
 /**
  * Registra o acesso a uma página no Firestore de forma atômica
@@ -21,16 +21,18 @@ export const recordPageView = async (pathname) => {
   if (!db) return;
 
   let pageKey = null;
-  if (pathname === '/') pageKey = 'home';
-  else if (pathname.startsWith('/wiki')) pageKey = 'wiki';
-  else if (pathname.startsWith('/loja')) pageKey = 'store';
-  else if (pathname.startsWith('/biblioteca') || pathname.startsWith('/perfil')) pageKey = 'library';
+  if (pathname === '/') pageKey = 'viewsHome';
+  else if (pathname.startsWith('/wiki')) pageKey = 'viewsWiki';
+  else if (pathname.startsWith('/loja')) pageKey = 'viewsStore';
+  else if (pathname.startsWith('/biblioteca')) pageKey = 'viewsLibrary';
+  else if (pathname.startsWith('/perfil')) pageKey = 'viewsProfile';
+  else if (pathname.startsWith('/admin')) pageKey = 'viewsAdmin';
 
-  if (!pageKey) return;
+  if (!pageKey) pageKey = 'viewsOther';
 
   try {
-    const pageviewsRef = doc(db, 'analytics', 'pageviews');
-    await setDoc(pageviewsRef, {
+    const trafficRef = doc(db, 'telemetry', 'traffic');
+    await setDoc(trafficRef, {
       [pageKey]: increment(1)
     }, { merge: true });
   } catch (err) {
@@ -57,141 +59,95 @@ export const recordDownload = async (user, platform) => {
 };
 
 /**
- * Busca todas as métricas consolidadas em tempo real do Cloud Firestore
+ * Converte qualquer tipo de data do Firestore (Timestamp, string ISO ou Date) em objeto Date válido
  */
-export const fetchAdminMetrics = async () => {
+const parseFirestoreDate = (timestamp) => {
+  if (!timestamp) return null;
+  if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+    return timestamp.toDate();
+  }
+  if (timestamp instanceof Date) return timestamp;
+  if (typeof timestamp === 'string' || typeof timestamp === 'number') {
+    const d = new Date(timestamp);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return null;
+};
+
+/**
+ * Busca todas as métricas consolidadas em tempo real do Cloud Firestore
+ * Suporta filtro temporal por período de dias (de X até Y)
+ */
+export const fetchAdminMetrics = async (dateRange = null) => {
+  // Valores padrão caso o banco esteja indisponível
+  const defaultPageViews = { home: 0, store: 0, wiki: 0, library: 0, profile: 0, admin: 0, other: 0 };
+
   if (!db) {
-    return FINANCIAL_METRICS;
+    return {
+      grossRevenue: 0,
+      gatewayFeesTotal: 0,
+      taxesTotal: 0,
+      netRevenue: 0,
+      totalOrders: 0,
+      averageTicket: 0,
+      totalDownloads: 0,
+      downloadsWindows: 0,
+      downloadsLinux: 0,
+      totalUsers: 0,
+      licensedUsers: 0,
+      newUsersInPeriod: 0,
+      conversionRate: '0.0%',
+      pageViews: defaultPageViews,
+      totalTraffic: 0,
+      purchases: [],
+      downloads: [],
+      usersList: [],
+      dailyTimeline: [],
+      isRealData: false
+    };
   }
 
   try {
-    // 1. Buscar transações da coleção 'purchases'
-    const purchasesSnap = await getDocs(collection(db, 'purchases'));
-    const realOrdersCount = purchasesSnap.size;
-
-    let realGrossRevenue = 0;
-    purchasesSnap.forEach((docSnap) => {
-      const data = docSnap.data();
-      const val = typeof data.grossValue === 'number' 
-        ? data.grossValue 
-        : typeof data.priceValue === 'number' 
-        ? data.priceValue 
-        : 50.00; // Valor nominal da licença do jogo para apuração contábil
-      realGrossRevenue += val;
-    });
-
-    // Se o banco tiver pedidos reais gravados, calcula em cima deles; se estiver vazio, usa a base contábil
-    const totalOrders = realOrdersCount > 0 ? realOrdersCount : FINANCIAL_METRICS.totalOrders;
-    const grossRevenue = realOrdersCount > 0 ? realGrossRevenue : FINANCIAL_METRICS.grossRevenue;
-
-    // Deduções fiscais e gateway
-    const gatewayFeesTotal = grossRevenue * GATEWAY_CONFIG.percentageFee + totalOrders * GATEWAY_CONFIG.fixedFee;
-    const taxesTotal = grossRevenue * GATEWAY_CONFIG.taxRate;
-    const netRevenue = grossRevenue - gatewayFeesTotal - taxesTotal;
-    const averageTicket = totalOrders > 0 ? grossRevenue / totalOrders : 50.00;
-
-    // 2. Buscar contagem de downloads da coleção 'downloads'
-    const downloadsSnap = await getDocs(collection(db, 'downloads'));
-    const realDownloadsCount = downloadsSnap.size;
-
-    // 3. Buscar acessos por página do documento 'telemetry/traffic' (e 'analytics/pageviews' como fallback)
+    // 1. Buscar Acessos Reais de 'telemetry/traffic'
     const trafficDoc = await getDoc(doc(db, 'telemetry', 'traffic'));
-    let pageViews = { ...FINANCIAL_METRICS.pageViews, profile: 0, admin: 0 };
+    let pageViews = { ...defaultPageViews };
     let telemetryDownloads = 0;
 
     if (trafficDoc.exists()) {
       const tData = trafficDoc.data();
       pageViews = {
-        home: (tData.viewsHome || 0) + FINANCIAL_METRICS.pageViews.home,
-        wiki: (tData.viewsWiki || 0) + FINANCIAL_METRICS.pageViews.wiki,
-        store: (tData.viewsStore || 0) + FINANCIAL_METRICS.pageViews.store,
-        library: (tData.viewsLibrary || 0) + FINANCIAL_METRICS.pageViews.library,
+        home: tData.viewsHome || 0,
+        store: tData.viewsStore || 0,
+        wiki: tData.viewsWiki || 0,
+        library: tData.viewsLibrary || 0,
         profile: tData.viewsProfile || 0,
-        admin: tData.viewsAdmin || 0
+        admin: tData.viewsAdmin || 0,
+        other: tData.viewsOther || 0
       };
       telemetryDownloads = tData.downloadsCount || 0;
-    } else {
-      const viewsDoc = await getDoc(doc(db, 'analytics', 'pageviews'));
-      if (viewsDoc.exists()) {
-        const vData = viewsDoc.data();
-        pageViews = {
-          home: (vData.home || 0) + FINANCIAL_METRICS.pageViews.home,
-          wiki: (vData.wiki || 0) + FINANCIAL_METRICS.pageViews.wiki,
-          store: (vData.store || 0) + FINANCIAL_METRICS.pageViews.store,
-          library: (vData.library || 0) + FINANCIAL_METRICS.pageViews.library,
-          profile: 0,
-          admin: 0
-        };
-      }
     }
 
-    const totalDownloads = realDownloadsCount > 0 
-      ? realDownloadsCount + telemetryDownloads 
-      : FINANCIAL_METRICS.totalDownloads + telemetryDownloads;
+    const totalTraffic = Object.values(pageViews).reduce((sum, val) => sum + val, 0);
 
-    const conversionRate = pageViews.store > 0 
-      ? ((totalOrders / pageViews.store) * 100).toFixed(1) + '%' 
-      : '4.8%';
-
-    return {
-      grossRevenue,
-      gatewayFeesTotal,
-      taxesTotal,
-      netRevenue,
-      totalOrders,
-      averageTicket,
-      totalDownloads,
-      conversionRate,
-      pageViews,
-      isRealData: realOrdersCount > 0 || realDownloadsCount > 0 || trafficDoc.exists()
-    };
-  } catch (err) {
-    console.warn('Erro ao carregar métricas reais do Firestore:', err);
-    return FINANCIAL_METRICS;
-  }
-};
-
-/**
- * Busca as transações reais da coleção 'purchases'
- */
-export const fetchRealTransactions = async () => {
-  if (!db) return RECENT_TRANSACTIONS;
-
-  try {
-    const q = query(collection(db, 'purchases'), orderBy('acquiredAt', 'desc'), limit(25));
-    const snap = await getDocs(q);
-
-    if (snap.empty) {
-      // Se ainda não tiver compras no Firestore, retorna a lista inicial
-      return RECENT_TRANSACTIONS;
-    }
-
-    const transactions = [];
-    snap.forEach((docSnap) => {
+    // 2. Buscar todas as transações reais da coleção 'purchases'
+    const purchasesSnap = await getDocs(collection(db, 'purchases'));
+    const allPurchases = [];
+    purchasesSnap.forEach((docSnap) => {
       const data = docSnap.data();
-      const grossValue = typeof data.grossValue === 'number' ? data.grossValue : 50.00;
-      const gatewayFee = grossValue * GATEWAY_CONFIG.percentageFee + GATEWAY_CONFIG.fixedFee;
+      const dateObj = parseFirestoreDate(data.acquiredAt) || new Date();
+      const grossValue = typeof data.grossValue === 'number' ? data.grossValue : 10.00;
+      const gatewayFee = typeof data.gatewayFee === 'number' ? data.gatewayFee : (grossValue * GATEWAY_CONFIG.percentageFee + GATEWAY_CONFIG.fixedFee);
       const taxWithheld = grossValue * GATEWAY_CONFIG.taxRate;
-      const netValue = grossValue - gatewayFee - taxWithheld;
+      const netValue = typeof data.netValue === 'number' ? data.netValue : (grossValue - gatewayFee - taxWithheld);
 
-      let dateFormatted = 'Recente';
-      if (data.acquiredAt) {
-        if (data.acquiredAt.toDate) {
-          dateFormatted = data.acquiredAt.toDate().toLocaleString('pt-BR');
-        } else if (typeof data.acquiredAt === 'string') {
-          dateFormatted = new Date(data.acquiredAt).toLocaleString('pt-BR');
-        }
-      }
-
-      transactions.push({
+      allPurchases.push({
         id: data.orderProtocol || docSnap.id.slice(0, 8).toUpperCase(),
-        date: dateFormatted,
+        dateObj,
+        dateFormatted: dateObj.toLocaleString('pt-BR'),
+        date: dateObj.toLocaleString('pt-BR'),
         customerName: data.billingName || data.userEmail?.split('@')[0] || 'Sentinela',
         customerEmail: data.userEmail || '—',
-        paymentMethod: data.paymentMethod === 'pix' ? 'PIX Instantâneo' :
-                       data.paymentMethod === 'card' ? 'Cartão de Crédito' :
-                       data.paymentMethod === 'boleto' ? 'Boleto Bancário' :
-                       data.paymentMethod === 'paypal' ? 'PayPal Express' : 'PIX',
+        paymentMethod: data.paymentMethod || 'PIX Instantâneo',
         grossValue,
         gatewayFee,
         taxWithheld,
@@ -201,23 +157,228 @@ export const fetchRealTransactions = async () => {
       });
     });
 
-    return transactions;
+    // 3. Buscar todos os downloads reais da coleção 'downloads'
+    const downloadsSnap = await getDocs(collection(db, 'downloads'));
+    const allDownloads = [];
+    downloadsSnap.forEach((docSnap) => {
+      const data = docSnap.data();
+      const dateObj = parseFirestoreDate(data.downloadedAt) || new Date();
+      allDownloads.push({
+        id: docSnap.id,
+        dateObj,
+        dateFormatted: dateObj.toLocaleString('pt-BR'),
+        userEmail: data.userEmail || 'Usuário Anônimo',
+        userId: data.userId || '—',
+        platform: data.platform || 'windows'
+      });
+    });
+
+    // 4. Buscar todos os usuários cadastrados da coleção 'users'
+    const usersSnap = await getDocs(collection(db, 'users'));
+    const allUsers = [];
+    usersSnap.forEach((docSnap) => {
+      const data = docSnap.data();
+      const dateObj = parseFirestoreDate(data.createdAt) || new Date();
+      allUsers.push({
+        uid: docSnap.id,
+        dateObj,
+        dateFormatted: dateObj.toLocaleDateString('pt-BR'),
+        displayName: data.displayName || data.email?.split('@')[0] || 'Sentinela',
+        email: data.email || '—',
+        role: data.role || (data.isAdmin ? 'admin' : 'user'),
+        isAdmin: Boolean(data.isAdmin || data.role === 'admin'),
+        hasLicense: Boolean(data.hasLicense)
+      });
+    });
+
+    // 5. Aplicação do Filtro por Intervalo de Datas (De X até Y)
+    let filteredPurchases = allPurchases;
+    let filteredDownloads = allDownloads;
+    let filteredUsers = allUsers;
+
+    if (dateRange && (dateRange.startDate || dateRange.endDate)) {
+      const start = dateRange.startDate ? new Date(dateRange.startDate) : null;
+      if (start) start.setHours(0, 0, 0, 0);
+
+      const end = dateRange.endDate ? new Date(dateRange.endDate) : null;
+      if (end) end.setHours(23, 59, 59, 999);
+
+      if (start || end) {
+        filteredPurchases = allPurchases.filter(p => {
+          if (!p.dateObj) return true;
+          if (start && p.dateObj < start) return false;
+          if (end && p.dateObj > end) return false;
+          return true;
+        });
+
+        filteredDownloads = allDownloads.filter(d => {
+          if (!d.dateObj) return true;
+          if (start && d.dateObj < start) return false;
+          if (end && d.dateObj > end) return false;
+          return true;
+        });
+
+        filteredUsers = allUsers.filter(u => {
+          if (!u.dateObj) return true;
+          if (start && u.dateObj < start) return false;
+          if (end && u.dateObj > end) return false;
+          return true;
+        });
+      }
+    }
+
+    // 6. Cálculo das Métricas Filtradas
+    const realOrdersCount = filteredPurchases.length;
+    let realGrossRevenue = 0;
+    let realGatewayFees = 0;
+    let realTaxes = 0;
+    let realNetRevenue = 0;
+
+    filteredPurchases.forEach((p) => {
+      realGrossRevenue += p.grossValue;
+      realGatewayFees += p.gatewayFee;
+      realTaxes += p.taxWithheld;
+      realNetRevenue += p.netValue;
+    });
+
+    const averageTicket = realOrdersCount > 0 ? (realGrossRevenue / realOrdersCount) : 0;
+    
+    // Contagem de downloads reais
+    const downloadsWindows = filteredDownloads.filter(d => d.platform === 'windows').length;
+    const downloadsLinux = filteredDownloads.filter(d => d.platform === 'linux').length;
+    const totalDownloads = filteredDownloads.length > 0 ? filteredDownloads.length : telemetryDownloads;
+
+    // Métricas de Usuários
+    const totalUsers = allUsers.length;
+    const licensedUsers = allUsers.filter(u => u.hasLicense).length;
+    const newUsersInPeriod = filteredUsers.length;
+
+    // Taxa de conversão da loja
+    const conversionRate = pageViews.store > 0 
+      ? ((realOrdersCount / pageViews.store) * 100).toFixed(1) + '%' 
+      : '0.0%';
+
+    // 7. Geração de Linha do Tempo Diária para a Curva SVG
+    // Agrupa os últimos 7 dias do intervalo (ou dias relevantes) para a curva
+    const daysMap = {};
+    const today = new Date();
+    
+    // Inicializa os últimos 7 dias
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+      daysMap[key] = {
+        dateLabel: key,
+        gross: 0,
+        net: 0,
+        orders: 0,
+        downloads: 0,
+        newUsers: 0
+      };
+    }
+
+    // Distribui compras nos dias
+    filteredPurchases.forEach(p => {
+      if (p.dateObj) {
+        const key = `${String(p.dateObj.getDate()).padStart(2, '0')}/${String(p.dateObj.getMonth() + 1).padStart(2, '0')}`;
+        if (daysMap[key]) {
+          daysMap[key].gross += p.grossValue;
+          daysMap[key].net += p.netValue;
+          daysMap[key].orders += 1;
+        }
+      }
+    });
+
+    // Distribui downloads nos dias
+    filteredDownloads.forEach(d => {
+      if (d.dateObj) {
+        const key = `${String(d.dateObj.getDate()).padStart(2, '0')}/${String(d.dateObj.getMonth() + 1).padStart(2, '0')}`;
+        if (daysMap[key]) {
+          daysMap[key].downloads += 1;
+        }
+      }
+    });
+
+    // Distribui novos usuários nos dias
+    filteredUsers.forEach(u => {
+      if (u.dateObj) {
+        const key = `${String(u.dateObj.getDate()).padStart(2, '0')}/${String(u.dateObj.getMonth() + 1).padStart(2, '0')}`;
+        if (daysMap[key]) {
+          daysMap[key].newUsers += 1;
+        }
+      }
+    });
+
+    const dailyTimeline = Object.values(daysMap);
+
+    return {
+      grossRevenue: realGrossRevenue,
+      gatewayFeesTotal: realGatewayFees,
+      taxesTotal: realTaxes,
+      netRevenue: realNetRevenue,
+      totalOrders: realOrdersCount,
+      averageTicket,
+      totalDownloads,
+      downloadsWindows,
+      downloadsLinux,
+      totalUsers,
+      licensedUsers,
+      newUsersInPeriod,
+      conversionRate,
+      pageViews,
+      totalTraffic,
+      purchases: filteredPurchases.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0)),
+      downloads: filteredDownloads.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0)),
+      usersList: filteredUsers.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0)),
+      dailyTimeline,
+      isRealData: true
+    };
   } catch (err) {
-    console.warn('Erro ao buscar transações do Firestore:', err);
-    return RECENT_TRANSACTIONS;
+    console.error('Erro ao buscar métricas reais do Firestore:', err);
+    return {
+      grossRevenue: 0,
+      gatewayFeesTotal: 0,
+      taxesTotal: 0,
+      netRevenue: 0,
+      totalOrders: 0,
+      averageTicket: 0,
+      totalDownloads: 0,
+      downloadsWindows: 0,
+      downloadsLinux: 0,
+      totalUsers: 0,
+      licensedUsers: 0,
+      newUsersInPeriod: 0,
+      conversionRate: '0.0%',
+      pageViews: defaultPageViews,
+      totalTraffic: 0,
+      purchases: [],
+      downloads: [],
+      usersList: [],
+      dailyTimeline: [],
+      isRealData: false
+    };
   }
+};
+
+/**
+ * Busca as transações reais da coleção 'purchases'
+ */
+export const fetchRealTransactions = async (dateRange = null) => {
+  const data = await fetchAdminMetrics(dateRange);
+  return data.purchases;
 };
 
 /**
  * Gera as notas fiscais baseadas nas transações reais
  */
-export const fetchRealInvoices = async () => {
-  const transactions = await fetchRealTransactions();
+export const fetchRealInvoices = async (dateRange = null) => {
+  const transactions = await fetchRealTransactions(dateRange);
   if (!transactions || transactions.length === 0) return INVOICES_LEDGER;
 
   return transactions.map((t) => ({
     nfeNumber: t.nfeNumber || `NFS-e ${t.id}`,
-    issueDate: t.date.split(' ')[0] || new Date().toLocaleDateString('pt-BR'),
+    issueDate: t.dateFormatted ? t.dateFormatted.split(' ')[0] : new Date().toLocaleDateString('pt-BR'),
     customer: t.customerName,
     cnpjCpf: '000.***.***-00',
     serviceDescription: 'Licenciamento de Software de Jogo Eletrônico 2D (Eclipse: Ecos do Abismo)',

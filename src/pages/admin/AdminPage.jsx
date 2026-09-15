@@ -47,12 +47,7 @@ export const AdminPage = () => {
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
-            <div className={styles.eyebrow}>Governança Corporativa & TI</div>
             <h1 className={styles.title}>Painel de Controle Administrativo</h1>
-          </div>
-          <div className={styles.systemBadge}>
-            <AdminPanelSettingsOutlinedIcon style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '0.35rem' }} />
-            Módulo Integrado: Financeiro, Fiscal & CMS
           </div>
         </header>
 
