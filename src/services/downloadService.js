@@ -1,3 +1,5 @@
+import { recordDownload } from './adminService';
+
 /**
  * Serviço de download seguro para builds do Eclipse: Ecos do Abismo
  * Garante que URLs de storage não fiquem persistidas no HTML/DOM.
@@ -58,6 +60,9 @@ export const requestSecureDownload = async (user, platform = 'windows') => {
   // Limpeza imediata da memória e da DOM
   document.body.removeChild(tempLink);
   window.URL.revokeObjectURL(downloadUrl);
+
+  // 5. Registrar evento de download no Firestore
+  recordDownload(user, platform);
 
   return {
     success: true,

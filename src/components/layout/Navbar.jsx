@@ -10,12 +10,12 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
-import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 
 import styles from './Navbar.module.css';
 
 export const Navbar = () => {
-  const { user, logout, openAuthModal } = useAuth();
+  const { user, isAdmin, logout, openAuthModal } = useAuth();
 
   const userInitial = user?.displayName
     ? user.displayName.charAt(0).toUpperCase()
@@ -77,6 +77,18 @@ export const Navbar = () => {
                 <span>Biblioteca</span>
               </NavLink>
             </li>
+            {/* O link de Admin é estritamente visível apenas para administradores */}
+            {isAdmin && (
+              <li>
+                <NavLink 
+                  to="/admin" 
+                  className={({ isActive }) => isActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink}
+                >
+                  <AdminPanelSettingsOutlinedIcon />
+                  <span>Admin</span>
+                </NavLink>
+              </li>
+            )}
           </ul>
         </nav>
 
@@ -94,8 +106,11 @@ export const Navbar = () => {
                 <div className={styles.userInfo}>
                   <span className={styles.userName}>{userDisplayName}</span>
                   <span className={styles.userStatus}>
-                    <span className={styles.statusDot} />
-                    {user.hasLicense ? 'Licença Ativa' : 'Sentinela'}
+                    <span 
+                      className={styles.statusDot} 
+                      style={isAdmin ? { backgroundColor: 'var(--accent-amber)', boxShadow: '0 0 6px var(--accent-amber)' } : {}}
+                    />
+                    {isAdmin ? 'Administrador' : user.hasLicense ? 'Licença Ativa' : 'Sentinela'}
                   </span>
                 </div>
               </NavLink>

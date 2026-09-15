@@ -11,6 +11,7 @@ const Home = lazy(() => import('./pages/public/Home').then(m => ({ default: m.Ho
 const Wiki = lazy(() => import('./pages/public/Wiki').then(m => ({ default: m.Wiki || m.default })));
 const Store = lazy(() => import('./pages/public/Store').then(m => ({ default: m.Store || m.default })));
 const Profile = lazy(() => import('./pages/public/Profile').then(m => ({ default: m.Profile || m.default })));
+const AdminPage = lazy(() => import('./pages/admin/AdminPage').then(m => ({ default: m.AdminPage || m.default })));
 
 export const AppRouter = () => {
   return (
@@ -28,6 +29,7 @@ export const AppRouter = () => {
             <Route path="/loja" element={<Store />} />
             <Route path="/biblioteca" element={<Profile />} />
             <Route path="/perfil" element={<Profile />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </Suspense>
         <Footer />

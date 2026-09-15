@@ -1,0 +1,128 @@
+.accountingWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* Demonstrativo DRE */
+.dreBox {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+}
+
+.sectionHeader {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: var(--text-primary);
+}
+
+.dreTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.dreTable td {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dreLabel {
+  color: var(--text-secondary);
+}
+
+.dreValue {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  text-align: right;
+  color: var(--text-primary);
+}
+
+.dreDeduction {
+  color: #e57373;
+}
+
+.dreTotalRow td {
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-bottom: none;
+  padding-top: 1.25rem;
+}
+
+.dreTotalValue {
+  color: #81c784;
+}
+
+/* Tabela de Transações e Conciliação Gateway */
+.tableSection {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  overflow-x: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.dataTable th {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.dataTable td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.statusAuthorized {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #81c784;
+  background-color: rgba(129, 199, 132, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.statusPending {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-amber);
+  background-color: rgba(217, 154, 78, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.btnAction {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btnAction:hover {
+  border-color: var(--accent-terracotta);
+  color: var(--accent-terracotta);
+}

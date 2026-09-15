@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { recordPageView } from '../../services/adminService';
 
 export const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -10,6 +11,9 @@ export const ScrollToTop = () => {
       left: 0,
       behavior: 'instant'
     });
+
+    // Registra o tráfego da página no Firestore
+    recordPageView(pathname);
   }, [pathname]);
 
   return null;

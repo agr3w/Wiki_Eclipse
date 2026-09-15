@@ -1,0 +1,91 @@
+.editorWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.editBlock {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+}
+
+.blockHeader {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.blockTitle {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.input {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent-terracotta);
+}
+
+.textarea {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  min-height: 100px;
+  resize: vertical;
+}
+
+.btnSave {
+  margin-top: 1rem;
+  align-self: flex-start;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--accent-terracotta);
+  border: 1px solid var(--accent-terracotta);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btnSave:hover {
+  background-color: var(--accent-terracotta-hover);
+}

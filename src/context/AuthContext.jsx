@@ -27,25 +27,42 @@ export const AuthProvider = ({ children }) => {
               const userDoc = await getDoc(userDocRef);
               
               if (userDoc.exists()) {
-                setUser({ ...currentUser, ...userDoc.data() });
+                const data = userDoc.data();
+                const isAdmin = Boolean(
+                  data?.role === 'admin' || 
+                  data?.isAdmin === true || 
+                  currentUser.email?.toLowerCase() === 'teste@gmail.com'
+                );
+
+                setUser({
+                  ...currentUser,
+                  ...data,
+                  isAdmin,
+                  role: data?.role || (isAdmin ? 'admin' : 'user')
+                });
               } else {
                 // Se o documento no Firestore ainda não existe, cria-o automaticamente
+                const isAdmin = currentUser.email?.toLowerCase() === 'teste@gmail.com';
                 const initialData = {
                   uid: currentUser.uid,
                   displayName: currentUser.displayName || currentUser.email?.split('@')[0] || '',
                   email: currentUser.email || '',
                   createdAt: serverTimestamp(),
-                  hasLicense: false
+                  hasLicense: false,
+                  role: isAdmin ? 'admin' : 'user',
+                  isAdmin
                 };
                 await setDoc(userDocRef, initialData, { merge: true });
                 setUser({ ...currentUser, ...initialData });
               }
             } else {
-              setUser(currentUser);
+              const isAdmin = currentUser.email?.toLowerCase() === 'teste@gmail.com';
+              setUser({ ...currentUser, isAdmin, role: isAdmin ? 'admin' : 'user' });
             }
           } catch (err) {
             console.warn('Erro ao carregar/sincronizar perfil do Firestore:', err);
-            setUser(currentUser);
+            const isAdmin = currentUser.email?.toLowerCase() === 'teste@gmail.com';
+            setUser({ ...currentUser, isAdmin, role: isAdmin ? 'admin' : 'user' });
           }
         } else {
           setUser(null);
@@ -67,19 +84,22 @@ export const AuthProvider = ({ children }) => {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(res.user, { displayName });
 
+    const isAdmin = email.toLowerCase() === 'teste@gmail.com';
     const initialData = {
       uid: res.user.uid,
       displayName,
       email,
       createdAt: serverTimestamp(),
-      hasLicense: false
+      hasLicense: false,
+      role: isAdmin ? 'admin' : 'user',
+      isAdmin
     };
 
     if (db) {
       await setDoc(doc(db, 'users', res.user.uid), initialData, { merge: true });
     }
 
-    setUser({ ...res.user, displayName, hasLicense: false });
+    setUser({ ...res.user, displayName, hasLicense: false, role: initialData.role, isAdmin });
     return res.user;
   };
 
@@ -162,9 +182,16 @@ export const AuthProvider = ({ children }) => {
     setAuthModalState(prev => ({ ...prev, isOpen: false }));
   };
 
+  const isAdmin = Boolean(
+    user?.isAdmin || 
+    user?.role === 'admin' || 
+    user?.email?.toLowerCase() === 'teste@gmail.com'
+  );
+
   return (
     <AuthContext.Provider value={{
       user,
+      isAdmin,
       loading,
       register,
       login,
