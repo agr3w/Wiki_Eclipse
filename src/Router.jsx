@@ -6,6 +6,12 @@ import { Footer } from './components/layout/Footer';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 import { AuthModal } from './components/auth/AuthModal';
 import { EclipseLoader } from './components/ui/EclipseLoader';
+import { usePageTracking } from './hooks/usePageTracking';
+
+const PageTracker = () => {
+  usePageTracking();
+  return null;
+};
 
 const Home = lazy(() => import('./pages/public/Home').then(m => ({ default: m.Home || m.default })));
 const Wiki = lazy(() => import('./pages/public/Wiki').then(m => ({ default: m.Wiki || m.default })));
@@ -17,6 +23,7 @@ export const AppRouter = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <PageTracker />
         <ScrollToTop />
         <Navbar />
         <AuthModal />

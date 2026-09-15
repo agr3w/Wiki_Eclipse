@@ -1,0 +1,540 @@
+.gatewayOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(9, 9, 11, 0.92);
+  backdrop-filter: blur(12px);
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.gatewayWindow {
+  width: 100%;
+  max-width: 580px;
+  max-height: calc(100vh - 2rem);
+  background-color: #121316;
+  border: 1px solid #272a30;
+  border-radius: 12px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: auto;
+  position: relative;
+}
+
+/* Header do Gateway */
+.gatewayHeader {
+  background-color: #181a1f;
+  padding: 0.9rem 1.35rem;
+  border-bottom: 1px solid #272a30;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.brandArea {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.gatewayBadge {
+  background-color: #00a868;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.gatewayTitle {
+  font-size: 0.92rem;
+  color: #e4e7eb;
+  font-weight: 600;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.environmentTag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: #8fa3b0;
+  border: 1px solid #333a42;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #8fa3b0;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  line-height: 1;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Conteúdo Principal com Scroll Interno Seguro */
+.gatewayBody {
+  padding: 1.15rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #272a30 #121316;
+}
+
+.gatewayBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.gatewayBody::-webkit-scrollbar-track {
+  background: #121316;
+}
+
+.gatewayBody::-webkit-scrollbar-thumb {
+  background: #272a30;
+  border-radius: 4px;
+}
+
+.gatewayBody::-webkit-scrollbar-thumb:hover {
+  background: #3c424c;
+}
+
+/* Detalhamento Contábil */
+.financeBreakdown {
+  background-color: #16181d;
+  border: 1px solid #22262d;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.breakdownRow {
+  display: flex;
+  justify-content: space-between;
+  color: #9ba3af;
+  align-items: center;
+}
+
+.breakdownTotal {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 0.45rem;
+  margin-top: 0.25rem;
+  border-top: 1px dashed #2c323b;
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.9rem;
+  align-items: center;
+}
+
+.netHighlight {
+  color: #00d084;
+}
+
+/* Métodos de Pagamento */
+.methodSelector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.methodBtn {
+  background-color: #1a1d24;
+  border: 1px solid #2a303a;
+  color: #cfd6df;
+  padding: 0.55rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.methodBtn:hover {
+  background-color: #232832;
+  border-color: #3b4452;
+}
+
+.activeMethod {
+  background-color: #003823;
+  border-color: #00a868;
+  color: #00e58d;
+}
+
+/* Área Dinâmica do Método */
+.methodContent {
+  background-color: #16181d;
+  border: 1px solid #242932;
+  border-radius: 8px;
+  padding: 0.95rem 1.1rem;
+  flex-shrink: 0;
+}
+
+.pixBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  text-align: center;
+}
+
+.qrCodeMock {
+  width: 96px;
+  height: 96px;
+  background-color: #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #000;
+  padding: 0.35rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.copyRow {
+  display: flex;
+  width: 100%;
+  gap: 0.45rem;
+}
+
+.copyCode {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  background-color: #101216;
+  border: 1px solid #2c323c;
+  color: #798696;
+  padding: 0.45rem 0.65rem;
+  border-radius: 4px;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copyBtn {
+  background-color: #1a1d24;
+  border: 1px solid #2c323c;
+  color: #00d084;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.copyBtn:hover {
+  background-color: #003823;
+  border-color: #00a868;
+}
+
+.methodNotice {
+  font-size: 0.74rem;
+  color: #8b95a2;
+  text-align: center;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.cardForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.label {
+  font-size: 0.72rem;
+  color: #8b95a2;
+}
+
+.input {
+  background-color: #101216;
+  border: 1px solid #2c323c;
+  color: #f0f3f6;
+  padding: 0.5rem 0.7rem;
+  border-radius: 5px;
+  font-size: 0.82rem;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #00a868;
+}
+
+.rowInputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.boletoBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.boletoLine {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  background-color: #101216;
+  border: 1px solid #2c323c;
+  color: #d1d5db;
+  padding: 0.6rem 0.75rem;
+  border-radius: 4px;
+  word-break: break-all;
+  text-align: center;
+}
+
+/* Rodapé e Confirmação */
+.gatewayFooter {
+  padding: 0.85rem 1.35rem;
+  background-color: #14161a;
+  border-top: 1px solid #272a30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: none;
+  color: #8b95a2;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+}
+
+.cancelBtn:hover {
+  color: #fff;
+}
+
+.payBtn {
+  background-color: #00a868;
+  color: #fff;
+  border: none;
+  padding: 0.65rem 1.4rem;
+  border-radius: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.payBtn:hover:not(:disabled) {
+  background-color: #00935b;
+}
+
+.payBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Tela de Sucesso */
+.successWrapper {
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.successIconWrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(0, 168, 104, 0.15);
+  border: 2px solid #00a868;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00e58d;
+  flex-shrink: 0;
+}
+
+.successHeading {
+  font-size: 1.2rem;
+  color: #fff;
+  font-weight: 600;
+  margin: 0;
+}
+
+.protocolBadge {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #00d084;
+  background: #002919;
+  border: 1px solid #005c38;
+  padding: 0.25rem 0.75rem;
+  border-radius: 5px;
+}
+
+.successDescription {
+  font-size: 0.82rem;
+  color: #9ba3af;
+  max-width: 440px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.successMetaBox {
+  width: 100%;
+  max-width: 440px;
+  background-color: #16181d;
+  border: 1px solid #242932;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  text-align: left;
+}
+
+.successMetaRow {
+  display: flex;
+  justify-content: space-between;
+  color: #8b95a2;
+}
+
+.successMetaVal {
+  color: #e4e7eb;
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.btnGoLibrary {
+  background-color: #00a868;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.6rem;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  margin-top: 0.25rem;
+}
+
+.btnGoLibrary:hover {
+  background-color: #00935b;
+}
+
+/* Otimizações Específicas para Notebooks (1366x768 / 1280x720 / telas baixas) */
+@media (max-height: 750px) {
+  .gatewayOverlay {
+    padding: 0.5rem;
+  }
+
+  .gatewayWindow {
+    max-height: 96vh;
+  }
+
+  .gatewayHeader {
+    padding: 0.65rem 1.15rem;
+  }
+
+  .gatewayBody {
+    padding: 0.85rem 1.15rem;
+    gap: 0.75rem;
+  }
+
+  .gatewayFooter {
+    padding: 0.65rem 1.15rem;
+  }
+
+  .qrCodeMock {
+    width: 80px;
+    height: 80px;
+    padding: 0.25rem;
+  }
+
+  .financeBreakdown {
+    padding: 0.6rem 0.85rem;
+  }
+
+  .methodContent {
+    padding: 0.75rem 0.9rem;
+  }
+
+  .cardForm {
+    gap: 0.5rem;
+  }
+
+  .payBtn {
+    padding: 0.55rem 1.2rem;
+  }
+}
+
+/* Telas Mobile ou Janelas Estreitas */
+@media (max-width: 540px) {
+  .gatewayWindow {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+
+  .methodBtn {
+    font-size: 0.72rem;
+    padding: 0.45rem 0.25rem;
+  }
+
+  .rowInputs {
+    grid-template-columns: 1fr;
+  }
+
+  .headerActions .environmentTag {
+    display: none;
+  }
+}

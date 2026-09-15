@@ -1,4 +1,5 @@
 import { recordDownload } from './adminService';
+import { trackDownloadMetric } from './analyticsService';
 
 /**
  * Serviço de download seguro para builds do Eclipse: Ecos do Abismo
@@ -63,6 +64,7 @@ export const requestSecureDownload = async (user, platform = 'windows') => {
 
   // 5. Registrar evento de download no Firestore
   recordDownload(user, platform);
+  trackDownloadMetric();
 
   return {
     success: true,

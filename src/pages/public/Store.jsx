@@ -7,7 +7,7 @@ import { MediaGallery } from '../../sections/store/MediaGallery';
 import { ProductSummary } from '../../sections/store/ProductSummary';
 import { PatchNoteModal } from '../../sections/store/PatchNoteModal';
 import { DiscussionSection } from '../../sections/store/DiscussionSection';
-import { CheckoutModal } from '../../components/checkout/CheckoutModal';
+import { ExternalGatewayModal } from '../../components/checkout/ExternalGatewayModal';
 import styles from './Store.module.css';
 
 export const Store = () => {
@@ -160,10 +160,11 @@ export const Store = () => {
         )}
       </AnimatePresence>
 
-      {/* Modal de Checkout Seguro */}
-      <CheckoutModal
+      {/* Modal de Checkout Externo Integrado (PagBank Sandbox) */}
+      <ExternalGatewayModal
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
+        onSuccess={() => navigate('/biblioteca')}
         onComplete={() => navigate('/biblioteca')}
       />
     </div>

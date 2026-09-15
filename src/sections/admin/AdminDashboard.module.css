@@ -48,16 +48,89 @@
   color: var(--text-secondary);
 }
 
-/* Gráfico de Acessos por Página */
+/* Gráfico e Curva Financeira em SVG */
+.chartSection {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chartTitle {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.chartSubtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.chartLegend {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.svgContainer {
+  width: 100%;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.svgChart {
+  width: 100%;
+  min-width: 580px;
+  height: auto;
+  display: block;
+}
+
+/* Gráfico de Acessos por Página com Barras Horizontais */
 .viewsSection {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .viewsHeader {
-  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .viewsTitle {
@@ -66,10 +139,95 @@
   color: var(--text-primary);
 }
 
+.viewsTotalBadge {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #00d084;
+  background: rgba(0, 168, 104, 0.12);
+  border: 1px solid rgba(0, 168, 104, 0.3);
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+}
+
+.trafficBarsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.trafficBarRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.barMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.85rem;
+}
+
+.barTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.barTitle {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.barRouteTag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background-color: var(--bg-main);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+}
+
+.barStatsGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+.barCount {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.barPercentage {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  width: 42px;
+  text-align: right;
+}
+
+.barTrack {
+  width: 100%;
+  height: 10px;
+  background-color: #1a1d24;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .trafficGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+  margin-top: 0.5rem;
 }
 
 .trafficCard {

@@ -140,16 +140,24 @@ export const AuthProvider = ({ children }) => {
     if (!user) return null;
     
     const orderProtocol = `ECL-${Date.now().toString().slice(-6)}`;
+    const grossValue = checkoutData.grossAmount || 10.00;
+    const gatewayFee = checkoutData.gatewayFee || 0.95;
+    const netValue = checkoutData.netAmount || (grossValue - gatewayFee);
+
     const purchaseRecord = {
       orderProtocol,
       userId: user.uid,
       userEmail: user.email,
       gameId: 'eclipse-ecos-do-abismo',
       gameTitle: 'Eclipse: Ecos do Abismo',
-      price: 'R$ 0,00',
-      paymentMethod: checkoutData.paymentMethod || 'pix',
+      price: `R$ ${grossValue.toFixed(2)}`,
+      grossValue,
+      gatewayFee,
+      netValue,
+      paymentMethod: checkoutData.paymentMethod || 'PIX Instantâneo',
       billingName: checkoutData.billingName || user.displayName || user.email?.split('@')[0],
       invoiceRecipientEmail: user.email,
+      gatewayProvider: checkoutData.gatewayProvider || 'PagBank Sandbox Enterprise',
       status: 'completed',
       acquiredAt: new Date().toISOString()
     };

@@ -93,20 +93,41 @@ export const fetchAdminMetrics = async () => {
     // 2. Buscar contagem de downloads da coleção 'downloads'
     const downloadsSnap = await getDocs(collection(db, 'downloads'));
     const realDownloadsCount = downloadsSnap.size;
-    const totalDownloads = realDownloadsCount > 0 ? realDownloadsCount : FINANCIAL_METRICS.totalDownloads;
 
-    // 3. Buscar acessos por página do documento 'analytics/pageviews'
-    const viewsDoc = await getDoc(doc(db, 'analytics', 'pageviews'));
-    let pageViews = { ...FINANCIAL_METRICS.pageViews };
-    if (viewsDoc.exists()) {
-      const vData = viewsDoc.data();
+    // 3. Buscar acessos por página do documento 'telemetry/traffic' (e 'analytics/pageviews' como fallback)
+    const trafficDoc = await getDoc(doc(db, 'telemetry', 'traffic'));
+    let pageViews = { ...FINANCIAL_METRICS.pageViews, profile: 0, admin: 0 };
+    let telemetryDownloads = 0;
+
+    if (trafficDoc.exists()) {
+      const tData = trafficDoc.data();
       pageViews = {
-        home: (vData.home || 0) + FINANCIAL_METRICS.pageViews.home,
-        wiki: (vData.wiki || 0) + FINANCIAL_METRICS.pageViews.wiki,
-        store: (vData.store || 0) + FINANCIAL_METRICS.pageViews.store,
-        library: (vData.library || 0) + FINANCIAL_METRICS.pageViews.library
+        home: (tData.viewsHome || 0) + FINANCIAL_METRICS.pageViews.home,
+        wiki: (tData.viewsWiki || 0) + FINANCIAL_METRICS.pageViews.wiki,
+        store: (tData.viewsStore || 0) + FINANCIAL_METRICS.pageViews.store,
+        library: (tData.viewsLibrary || 0) + FINANCIAL_METRICS.pageViews.library,
+        profile: tData.viewsProfile || 0,
+        admin: tData.viewsAdmin || 0
       };
+      telemetryDownloads = tData.downloadsCount || 0;
+    } else {
+      const viewsDoc = await getDoc(doc(db, 'analytics', 'pageviews'));
+      if (viewsDoc.exists()) {
+        const vData = viewsDoc.data();
+        pageViews = {
+          home: (vData.home || 0) + FINANCIAL_METRICS.pageViews.home,
+          wiki: (vData.wiki || 0) + FINANCIAL_METRICS.pageViews.wiki,
+          store: (vData.store || 0) + FINANCIAL_METRICS.pageViews.store,
+          library: (vData.library || 0) + FINANCIAL_METRICS.pageViews.library,
+          profile: 0,
+          admin: 0
+        };
+      }
     }
+
+    const totalDownloads = realDownloadsCount > 0 
+      ? realDownloadsCount + telemetryDownloads 
+      : FINANCIAL_METRICS.totalDownloads + telemetryDownloads;
 
     const conversionRate = pageViews.store > 0 
       ? ((totalOrders / pageViews.store) * 100).toFixed(1) + '%' 
@@ -122,7 +143,7 @@ export const fetchAdminMetrics = async () => {
       totalDownloads,
       conversionRate,
       pageViews,
-      isRealData: realOrdersCount > 0 || realDownloadsCount > 0 || viewsDoc.exists()
+      isRealData: realOrdersCount > 0 || realDownloadsCount > 0 || trafficDoc.exists()
     };
   } catch (err) {
     console.warn('Erro ao carregar métricas reais do Firestore:', err);
