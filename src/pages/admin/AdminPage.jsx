@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { AdminDashboard } from '../../sections/admin/AdminDashboard';
 import { AdminAccounting } from '../../sections/admin/AdminAccounting';
+import { AdminCosts } from '../../sections/admin/AdminCosts';
 import { AdminEditor } from '../../sections/admin/AdminEditor';
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
@@ -47,7 +48,11 @@ export const AdminPage = () => {
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
+            <div className={styles.eyebrow}>Governança Corporativa & TI</div>
             <h1 className={styles.title}>Painel de Controle Administrativo</h1>
+          </div>
+          <div className={styles.systemBadge}>
+            Módulo Integrado: Financeiro, Contábil, Custos & CMS
           </div>
         </header>
 
@@ -59,20 +64,27 @@ export const AdminPage = () => {
             Dashboard de Métricas & Tráfego
           </button>
           <button
+            className={`${styles.tabBtn} ${activeTab === 'costs' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('costs')}
+          >
+            Gestão de Custos & Margem Real
+          </button>
+          <button
             className={`${styles.tabBtn} ${activeTab === 'accounting' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('accounting')}
           >
-            Módulo Financeiro & Fiscal (NFS-e / Gateway)
+            Módulo Fiscal (NFS-e & Gateway)
           </button>
           <button
             className={`${styles.tabBtn} ${activeTab === 'editor' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('editor')}
           >
-            Editor de Conteúdo (Wiki & Loja)
+            Editor de Conteúdo
           </button>
         </div>
 
         {activeTab === 'dashboard' && <AdminDashboard />}
+        {activeTab === 'costs' && <AdminCosts />}
         {activeTab === 'accounting' && <AdminAccounting />}
         {activeTab === 'editor' && <AdminEditor />}
       </div>
