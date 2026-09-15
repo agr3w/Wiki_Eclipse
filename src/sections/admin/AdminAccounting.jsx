@@ -8,12 +8,15 @@ import {
 import { fetchAdminMetrics, fetchRealTransactions, fetchRealInvoices } from '../../services/adminService';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { DanfseModal } from '../../components/fiscal/DanfseModal';
+import { downloadXmlFile } from '../../services/fiscalService';
 import styles from './AdminAccounting.module.css';
 
 export const AdminAccounting = () => {
   const [metrics, setMetrics] = useState(FINANCIAL_METRICS);
   const [transactions, setTransactions] = useState(RECENT_TRANSACTIONS);
   const [invoices, setInvoices] = useState(INVOICES_LEDGER);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -35,8 +38,19 @@ export const AdminAccounting = () => {
     loadData();
   }, []);
 
-  const handlePrintNfe = (nfeNumber) => {
-    alert(`Gerando espelho contábil e DANFE eletrônica da nota ${nfeNumber}... Documento emitido em conformidade fiscal.`);
+  const handleOpenNfse = (nfeData) => {
+    setSelectedInvoice({
+      number: nfeData.nfeNumber || 'NFS-1001',
+      issueDate: nfeData.issueDate || '15/09/2026',
+      issueTime: '10:45:12',
+      verificationCode: 'A9F3-481B-902C-71ED',
+      customerName: nfeData.customer || nfeData.customerName || 'Consumidor Final',
+      customerEmail: nfeData.customerEmail || 'cliente.adquirente@gmail.com',
+      serviceDescription: nfeData.serviceDescription || 'Licenciamento de Software de Jogo Eletrônico 2D (Eclipse: Ecos do Abismo)',
+      grossAmount: typeof nfeData.grossAmount === 'number' ? nfeData.grossAmount : 10.00,
+      paymentMethod: nfeData.paymentMethod || 'PagBank Sandbox (Cartão/PIX)',
+      orderProtocol: nfeData.orderProtocol || 'ECL-9482'
+    });
   };
 
   if (loading) {
@@ -165,12 +179,12 @@ export const AdminAccounting = () => {
           <thead>
             <tr>
               <th>Número da Nota</th>
-              <th>Emissão</th>
+              <th>Data Emissão</th>
               <th>Tomador</th>
               <th>Discriminação do Serviço</th>
-              <th>Valor Total</th>
+              <th>Valor Bruto</th>
               <th>Status</th>
-              <th>Ações</th>
+              <th>Ações Fiscais</th>
             </tr>
           </thead>
           <tbody>
@@ -185,15 +199,39 @@ export const AdminAccounting = () => {
                   <span className={styles.statusAuthorized}>{nfe.status}</span>
                 </td>
                 <td>
-                  <button className={styles.btnAction} onClick={() => handlePrintNfe(nfe.nfeNumber)}>
-                    Visualizar DANFE
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <button className={styles.btnAction} onClick={() => handleOpenNfse(nfe)}>
+                      Visualizar DANFE
+                    </button>
+                    <button 
+                      className={styles.btnAction} 
+                      onClick={() => downloadXmlFile({
+                        number: nfe.nfeNumber,
+                        issueDate: nfe.issueDate,
+                        verificationCode: 'A9F3-481B-902C-71ED',
+                        customerName: nfe.customer,
+                        customerEmail: nfe.customerEmail || 'cliente@gmail.com',
+                        serviceDescription: nfe.serviceDescription,
+                        grossAmount: nfe.grossAmount
+                      })}
+                    >
+                      XML
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Modal Fidedigno do Espelho DANFSE */}
+      {selectedInvoice && (
+        <DanfseModal 
+          invoice={selectedInvoice} 
+          onClose={() => setSelectedInvoice(null)} 
+        />
+      )}
     </div>
   );
 };
