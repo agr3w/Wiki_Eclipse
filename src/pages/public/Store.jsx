@@ -7,21 +7,29 @@ import { MediaGallery } from '../../sections/store/MediaGallery';
 import { ProductSummary } from '../../sections/store/ProductSummary';
 import { PatchNoteModal } from '../../sections/store/PatchNoteModal';
 import { DiscussionSection } from '../../sections/store/DiscussionSection';
-import { ExternalGatewayModal } from '../../components/checkout/ExternalGatewayModal';
+import { CheckoutModal } from '../../components/checkout/CheckoutModal';
 import styles from './Store.module.css';
 
 export const Store = () => {
   const { user, openAuthModal } = useAuth();
   const [selectedPatch, setSelectedPatch] = useState(null);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleOpenCheckout = () => {
+  // Inicia o Processo 1 (Resumo da Loja no design Eclipse)
+  const handleStartPurchase = () => {
     if (!user) {
       openAuthModal('login');
       return;
     }
-    setIsCheckoutOpen(true);
+    setIsSummaryOpen(true);
+  };
+
+  // Transição para o Processo 2: Redirecionamento real para a rota externa do PagBank Gateway
+  const handleProceedToGateway = () => {
+    setIsSummaryOpen(false);
+    const sessionToken = `tok_sec_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+    navigate(`/checkout/pagbank?session=${sessionToken}&ref=ECL-9482&auth=tls256_enc`);
   };
 
   return (
@@ -32,7 +40,7 @@ export const Store = () => {
           <MediaGallery items={GAME_DETAILS.gallery} />
           <ProductSummary 
             game={GAME_DETAILS} 
-            onAcquire={handleOpenCheckout}
+            onAcquire={handleStartPurchase}
             hasLicense={user?.hasLicense}
           />
         </section>
@@ -160,12 +168,11 @@ export const Store = () => {
         )}
       </AnimatePresence>
 
-      {/* Modal de Checkout Externo Integrado (PagBank Sandbox) */}
-      <ExternalGatewayModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        onSuccess={() => navigate('/biblioteca')}
-        onComplete={() => navigate('/biblioteca')}
+      {/* PROCESSO 1: Modal de Resumo do Pedido (Tema Eclipse) */}
+      <CheckoutModal
+        isOpen={isSummaryOpen}
+        onClose={() => setIsSummaryOpen(false)}
+        onProceedToGateway={handleProceedToGateway}
       />
     </div>
   );

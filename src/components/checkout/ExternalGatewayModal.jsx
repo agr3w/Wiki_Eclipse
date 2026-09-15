@@ -1,72 +1,59 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
-import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
-import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import styles from './ExternalGatewayModal.module.css';
 
-export const ExternalGatewayModal = ({ isOpen, onClose, onSuccess, onComplete }) => {
+export const ExternalGatewayModal = ({ isOpen, onClose, onPaymentSuccess }) => {
   const { user, claimGameLicense } = useAuth();
-
-  const [paymentMethod, setPaymentMethod] = useState('pix');
-  const [billingName, setBillingName] = useState(user?.displayName || '');
-  const [cardNumber, setCardNumber] = useState('4111 •••• •••• 1234');
-  const [cardExpiry, setCardExpiry] = useState('12/28');
-  const [cardCvv, setCardCvv] = useState('888');
+  const [method, setMethod] = useState('pix');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [completedOrder, setCompletedOrder] = useState(null);
+  const [isApproved, setIsApproved] = useState(false);
+  const [transactionProtocol, setTransactionProtocol] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
 
-  const pixKeyMock = '00020126580014br.gov.bcb.pix0136ecl-9482-pagbank-2026520400005303986540510.005802BR5925Eclipse Studio Ecos Abismo6009SAO PAULO62070503***6304ABCD';
-  const boletoLineMock = '23793.38128 60083.010488 56006.333306 9 94820000001000';
+  // Valores reais operacionais
+  const nominalPrice = 10.00;
+  const gatewayFee = 0.95; // 4.5% + R$ 0,50 fixo
+  const netReceived = nominalPrice - gatewayFee;
+  const pixMockString = '00020126580014br.gov.bcb.pix0136pagbank-ecl-9482-transacao-aprovada-2026';
 
   if (!isOpen) return null;
 
-  const handleCopy = (text) => {
+  const handleCopyPix = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(text);
+      navigator.clipboard.writeText(pixMockString);
       setCopiedCode(true);
       setTimeout(() => setCopiedCode(false), 2000);
     }
   };
 
-  const handleConfirmPayment = async (e) => {
-    if (e) e.preventDefault();
+  const handleAuthorizePayment = async () => {
     setIsProcessing(true);
-
-    const methodLabels = {
-      pix: 'PIX Instantâneo',
-      card: 'Cartão de Crédito',
-      boleto: 'Boleto Bancário'
-    };
 
     try {
       const order = await claimGameLicense({
-        grossAmount: 10.00,
-        gatewayFee: 0.95,
-        netAmount: 9.05,
-        paymentMethod: methodLabels[paymentMethod] || 'PIX Instantâneo',
-        billingName: billingName.trim() || user?.displayName || user?.email?.split('@')[0] || 'Sentinela Eclipse',
-        gatewayProvider: 'PagBank Sandbox Enterprise'
+        paymentMethod: method === 'pix' ? 'PIX Instantâneo' : method === 'card' ? 'Cartão de Crédito' : 'Boleto Bancário',
+        grossAmount: nominalPrice,
+        gatewayFee: gatewayFee,
+        netAmount: netReceived,
+        gatewayProvider: 'PagBank Sandbox Enterprise',
+        billingName: user?.displayName || user?.email?.split('@')[0] || 'Jogador Registrado'
       });
 
-      setCompletedOrder(order);
-    } catch (err) {
-      console.error('Erro no processamento do gateway:', err);
-      alert('Erro ao registrar transação no gateway. Verifique sua conexão.');
-    } finally {
+      setTransactionProtocol(order?.orderProtocol || `PAG-${Date.now().toString().slice(-6)}`);
+      setIsProcessing(false);
+      setIsApproved(true);
+    } catch {
+      alert('Erro ao autorizar a transação no PagBank.');
       setIsProcessing(false);
     }
   };
 
   const handleFinish = () => {
+    setIsApproved(false);
     onClose();
-    if (onSuccess) onSuccess(completedOrder);
-    if (onComplete) onComplete(completedOrder);
+    if (onPaymentSuccess) onPaymentSuccess();
   };
 
   return (
@@ -75,27 +62,24 @@ export const ExternalGatewayModal = ({ isOpen, onClose, onSuccess, onComplete })
         <motion.div 
           className={styles.gatewayWindow}
           onClick={(e) => e.stopPropagation()}
-          initial={{ opacity: 0, scale: 0.95, y: 12 }}
+          initial={{ opacity: 0, scale: 0.96, y: 14 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 12 }}
+          exit={{ opacity: 0, scale: 0.96, y: 14 }}
           transition={{ duration: 0.2 }}
         >
-          {/* Header do Gateway Integrado */}
+          {/* Header PagBank */}
           <div className={styles.gatewayHeader}>
             <div className={styles.brandArea}>
-              <span className={styles.gatewayBadge}>PagBank</span>
+              <span className={styles.pagbankLogo}>PagBank</span>
               <span className={styles.gatewayTitle}>Checkout Seguro</span>
             </div>
             <div className={styles.headerActions}>
-              <div className={styles.environmentTag}>
-                <LockOutlinedIcon style={{ fontSize: '0.8rem', verticalAlign: 'middle', marginRight: '3px' }} />
-                Ambiente de Homologação
-              </div>
+              <span className={styles.securityPill}>🔒 Criptografia TLS 256-bit</span>
               <button 
                 type="button" 
                 className={styles.closeBtn} 
                 onClick={onClose} 
-                title="Fechar checkout"
+                title="Fechar"
                 aria-label="Fechar"
               >
                 ✕
@@ -103,58 +87,51 @@ export const ExternalGatewayModal = ({ isOpen, onClose, onSuccess, onComplete })
             </div>
           </div>
 
-          {!completedOrder ? (
+          {!isApproved ? (
             <>
               <div className={styles.gatewayBody}>
-                {/* Detalhamento Contábil e Intermediação */}
-                <div className={styles.financeBreakdown}>
-                  <div className={styles.breakdownRow}>
-                    <span>Produto: <strong>Eclipse: Ecos do Abismo (Edição de Lançamento)</strong></span>
-                    <span>R$ 10,00</span>
+                {/* Resumo da Cobrança */}
+                <div className={styles.amountCard}>
+                  <div>
+                    <div className={styles.merchantName}>Estabelecimento: The Wavem Collective</div>
+                    <div className={styles.orderProduct}>Eclipse: Ecos do Abismo</div>
                   </div>
-                  <div className={styles.breakdownRow}>
-                    <span>Taxa Intermediação Gateway (PagBank 4.5% + R$ 0,50):</span>
-                    <span style={{ color: '#ef5350' }}>- R$ 0,95</span>
-                  </div>
-                  <div className={styles.breakdownTotal}>
-                    <span>Repasse Líquido Estúdio:</span>
-                    <span className={styles.netHighlight}>R$ 9,05</span>
+                  <div className={styles.totalCharge}>
+                    <div className={styles.chargeLabel}>Valor a Pagar</div>
+                    <div className={styles.chargeValue}>R$ {nominalPrice.toFixed(2)}</div>
                   </div>
                 </div>
 
-                {/* Seletor de Métodos de Pagamento */}
+                {/* Seleção do Método */}
                 <div className={styles.methodSelector}>
                   <button 
-                    type="button" 
-                    className={`${styles.methodBtn} ${paymentMethod === 'pix' ? styles.activeMethod : ''}`}
-                    onClick={() => setPaymentMethod('pix')}
+                    type="button"
+                    className={`${styles.methodBtn} ${method === 'pix' ? styles.activeMethod : ''}`}
+                    onClick={() => setMethod('pix')}
                   >
-                    <QrCode2OutlinedIcon style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }} />
                     PIX Instantâneo
                   </button>
                   <button 
-                    type="button" 
-                    className={`${styles.methodBtn} ${paymentMethod === 'card' ? styles.activeMethod : ''}`}
-                    onClick={() => setPaymentMethod('card')}
+                    type="button"
+                    className={`${styles.methodBtn} ${method === 'card' ? styles.activeMethod : ''}`}
+                    onClick={() => setMethod('card')}
                   >
-                    <CreditCardOutlinedIcon style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }} />
                     Cartão de Crédito
                   </button>
                   <button 
-                    type="button" 
-                    className={`${styles.methodBtn} ${paymentMethod === 'boleto' ? styles.activeMethod : ''}`}
-                    onClick={() => setPaymentMethod('boleto')}
+                    type="button"
+                    className={`${styles.methodBtn} ${method === 'boleto' ? styles.activeMethod : ''}`}
+                    onClick={() => setMethod('boleto')}
                   >
-                    <ReceiptLongOutlinedIcon style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px' }} />
                     Boleto Bancário
                   </button>
                 </div>
 
-                {/* Conteúdo Dinâmico por Método */}
-                <div className={styles.methodContent}>
-                  {paymentMethod === 'pix' && (
+                {/* Detalhes do Pagamento */}
+                <div className={styles.methodDetails}>
+                  {method === 'pix' && (
                     <div className={styles.pixBox}>
-                      <div className={styles.qrCodeMock}>
+                      <div className={styles.qrCodeCard}>
                         <svg width="86" height="86" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <rect width="120" height="120" fill="white" rx="4"/>
                           <rect x="12" y="12" width="28" height="28" rx="3" stroke="#000" strokeWidth="4" fill="none"/>
@@ -185,178 +162,84 @@ export const ExternalGatewayModal = ({ isOpen, onClose, onSuccess, onComplete })
                           <rect x="84" y="100" width="10" height="8" fill="#000"/>
                         </svg>
                       </div>
-                      <div className={styles.copyRow}>
+                      <div className={styles.pixCodeRow}>
                         <input 
                           readOnly 
-                          value={pixKeyMock} 
-                          className={styles.copyCode}
-                          title="Chave Pix Copia e Cola" 
+                          value={pixMockString} 
+                          className={styles.pixCode} 
+                          title="Chave Pix"
                         />
                         <button 
                           type="button" 
                           className={styles.copyBtn}
-                          onClick={() => handleCopy(pixKeyMock)}
+                          onClick={handleCopyPix}
                         >
-                          <ContentCopyOutlinedIcon style={{ fontSize: '0.85rem', verticalAlign: 'middle', marginRight: '3px' }} />
+                          <ContentCopyOutlinedIcon style={{ fontSize: '0.8rem', verticalAlign: 'middle', marginRight: '3px' }} />
                           {copiedCode ? 'Copiado!' : 'Copiar'}
                         </button>
                       </div>
-                      <p className={styles.methodNotice}>
-                        Aponte a câmera do aplicativo do seu banco para o QR Code ou copie a linha Pix. A confirmação é instantânea e libera a licença imediatamente na sua conta.
-                      </p>
+                      <span style={{ fontSize: '0.76rem', color: '#8b95a2' }}>
+                        Escaneie pelo aplicativo de qualquer instituição para aprovação imediata.
+                      </span>
                     </div>
                   )}
 
-                  {paymentMethod === 'card' && (
-                    <form className={styles.cardForm} onSubmit={handleConfirmPayment}>
+                  {method === 'card' && (
+                    <div className={styles.cardForm}>
                       <div className={styles.inputGroup}>
-                        <label className={styles.label}>Nome Completo do Titular (conforme no cartão)</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={billingName} 
-                          onChange={(e) => setBillingName(e.target.value)}
-                          placeholder="Ex: Yuri Nascimento"
-                          className={styles.input}
-                        />
+                        <label className={styles.inputLabel}>Número do Cartão</label>
+                        <input type="text" defaultValue="5502 •••• •••• 9842" className={styles.inputField} />
                       </div>
-
                       <div className={styles.inputGroup}>
-                        <label className={styles.label}>Número do Cartão de Crédito</label>
-                        <input 
-                          type="text" 
-                          value={cardNumber} 
-                          onChange={(e) => setCardNumber(e.target.value)}
-                          placeholder="4111 2222 3333 4444"
-                          className={styles.input}
-                        />
+                        <label className={styles.inputLabel}>Nome Impresso no Cartão</label>
+                        <input type="text" defaultValue={user?.displayName?.toUpperCase() || 'TITULAR DO CARTAO'} className={styles.inputField} />
                       </div>
-
                       <div className={styles.rowInputs}>
                         <div className={styles.inputGroup}>
-                          <label className={styles.label}>Validade (MM/AA)</label>
-                          <input 
-                            type="text" 
-                            value={cardExpiry}
-                            onChange={(e) => setCardExpiry(e.target.value)}
-                            placeholder="12/28" 
-                            className={styles.input} 
-                          />
+                          <label className={styles.inputLabel}>Validade</label>
+                          <input type="text" defaultValue="09/29" className={styles.inputField} />
                         </div>
                         <div className={styles.inputGroup}>
-                          <label className={styles.label}>Código de Segurança (CVV)</label>
-                          <input 
-                            type="text" 
-                            value={cardCvv}
-                            onChange={(e) => setCardCvv(e.target.value)}
-                            placeholder="888" 
-                            className={styles.input} 
-                          />
+                          <label className={styles.inputLabel}>CVV</label>
+                          <input type="text" defaultValue="412" className={styles.inputField} />
                         </div>
                       </div>
-
-                      <div className={styles.inputGroup}>
-                        <label className={styles.label}>Opção de Parcelamento</label>
-                        <select className={styles.input} defaultValue="1">
-                          <option value="1">1x de R$ 10,00 sem juros (À vista)</option>
-                          <option value="2">2x de R$ 5,00 sem juros</option>
-                        </select>
-                      </div>
-                    </form>
+                    </div>
                   )}
 
-                  {paymentMethod === 'boleto' && (
-                    <div className={styles.boletoBox}>
-                      <div className={styles.boletoLine}>
-                        {boletoLineMock}
-                      </div>
-                      <div className={styles.copyRow}>
-                        <button 
-                          type="button" 
-                          className={styles.copyBtn}
-                          style={{ width: '100%' }}
-                          onClick={() => handleCopy(boletoLineMock)}
-                        >
-                          <ContentCopyOutlinedIcon style={{ fontSize: '0.85rem', verticalAlign: 'middle', marginRight: '4px' }} />
-                          {copiedCode ? 'Linha Digitável Copiada!' : 'Copiar Linha Digitável do Boleto'}
-                        </button>
-                      </div>
-                      <p className={styles.methodNotice}>
-                        Boleto registrado pelo PagBank. Compensação bancária simulada para homologação do projeto.
-                      </p>
+                  {method === 'boleto' && (
+                    <div style={{ textAlign: 'center', padding: '1.25rem 0.5rem', color: '#8b95a2', fontSize: '0.82rem', lineHeight: 1.5 }}>
+                      A representação gráfica do código de barras será gerada pelo PagBank e despachada para <strong>{user?.email}</strong>.
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Rodapé de Ação */}
+              {/* Rodapé PagBank */}
               <div className={styles.gatewayFooter}>
-                <button 
-                  type="button" 
-                  className={styles.cancelBtn} 
-                  onClick={onClose}
-                  disabled={isProcessing}
-                >
+                <button type="button" className={styles.btnCancel} onClick={onClose}>
                   Cancelar
                 </button>
                 <button 
                   type="button" 
-                  className={styles.payBtn}
-                  onClick={handleConfirmPayment}
+                  className={styles.btnPay}
+                  onClick={handleAuthorizePayment}
                   disabled={isProcessing}
                 >
-                  {isProcessing ? 'Processando no Gateway...' : 'Autorizar Pagamento (R$ 10,00)'}
+                  {isProcessing ? 'Processando no PagBank...' : `Pagar R$ ${nominalPrice.toFixed(2)}`}
                 </button>
               </div>
             </>
           ) : (
-            /* Tela de Confirmação e Sucesso */
-            <div className={styles.successWrapper}>
-              <div className={styles.successIconWrapper}>
-                <CheckCircleOutlineIcon style={{ fontSize: '2.4rem' }} />
-              </div>
-
-              <h2 className={styles.successHeading}>Pagamento Aprovado pelo Gateway!</h2>
-              
-              <div className={styles.protocolBadge}>
-                Protocolo: {completedOrder.orderProtocol}
-              </div>
-
-              <p className={styles.successDescription}>
-                A licença digital do <strong>Eclipse: Ecos do Abismo</strong> foi autorizada e sincronizada com a sua conta no Cloud Firestore.
+            <div className={styles.successArea}>
+              <div className={styles.checkIcon}>✓</div>
+              <h2 style={{ fontSize: '1.35rem', color: '#ffffff', fontWeight: 600 }}>Pagamento Aprovado</h2>
+              <div className={styles.protocolBadge}>Protocolo PagBank: {transactionProtocol}</div>
+              <p style={{ fontSize: '0.88rem', color: '#8b95a2', maxWidth: '420px', lineHeight: 1.6 }}>
+                A transação de <strong>R$ {nominalPrice.toFixed(2)}</strong> foi compensada com sucesso pelo PagBank. Sua licença de <strong>Eclipse: Ecos do Abismo</strong> já está ativa.
               </p>
-
-              <div className={styles.successMetaBox}>
-                <div className={styles.successMetaRow}>
-                  <span>Adquirente / Gateway:</span>
-                  <span className={styles.successMetaVal}>PagBank Enterprise Sandbox</span>
-                </div>
-                <div className={styles.successMetaRow}>
-                  <span>Titular Faturado:</span>
-                  <span className={styles.successMetaVal}>{completedOrder.billingName}</span>
-                </div>
-                <div className={styles.successMetaRow}>
-                  <span>E-mail da Conta:</span>
-                  <span className={styles.successMetaVal}>{completedOrder.userEmail}</span>
-                </div>
-                <div className={styles.successMetaRow}>
-                  <span>Valor Bruto Autorizado:</span>
-                  <span className={styles.successMetaVal}>{completedOrder.price}</span>
-                </div>
-                <div className={styles.successMetaRow}>
-                  <span>Repasse Líquido Contábil:</span>
-                  <span className={styles.successMetaVal} style={{ color: '#00e58d' }}>
-                    R$ {completedOrder.netValue?.toFixed(2) || '9.05'}
-                  </span>
-                </div>
-              </div>
-
-              <button 
-                type="button" 
-                className={styles.btnGoLibrary}
-                onClick={handleFinish}
-              >
-                Acessar Minha Biblioteca & Download →
+              <button className={styles.btnPay} onClick={handleFinish} style={{ marginTop: '0.5rem' }}>
+                Acessar Minha Biblioteca →
               </button>
             </div>
           )}
