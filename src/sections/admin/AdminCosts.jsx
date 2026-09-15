@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { COST_STRUCTURE } from '../../data/costManagementData';
+import { fetchAdminMetrics } from '../../services/adminService';
+import TrendingDownOutlinedIcon from '@mui/icons-material/TrendingDownOutlined';
+import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
+import TrackChangesOutlinedIcon from '@mui/icons-material/TrackChangesOutlined';
 import styles from './AdminCosts.module.css';
 
 export const AdminCosts = () => {
@@ -7,10 +11,26 @@ export const AdminCosts = () => {
   const [fixedOverhead, setFixedOverhead] = useState(
     COST_STRUCTURE.fixedCosts.reduce((acc, curr) => acc + curr.monthlyAmount, 0)
   );
+  const [currentSalesCount, setCurrentSalesCount] = useState(0);
 
   const [inputPrice, setInputPrice] = useState('10.00');
   const [inputOverhead, setInputOverhead] = useState('415.00');
   const [validationError, setValidationError] = useState('');
+
+  // Busca dados de vendas reais do Firestore para o progresso da meta
+  useEffect(() => {
+    const loadSales = async () => {
+      try {
+        const metrics = await fetchAdminMetrics();
+        if (metrics && typeof metrics.totalOrders === 'number') {
+          setCurrentSalesCount(metrics.totalOrders);
+        }
+      } catch {
+        // Fallback gracioso
+      }
+    };
+    loadSales();
+  }, []);
 
   // Custos Variáveis Unitários
   const totalVariableCosts = COST_STRUCTURE.variableCosts.reduce(
@@ -47,47 +67,185 @@ export const AdminCosts = () => {
 
   return (
     <div className={styles.costsWrapper}>
-      {/* 4 Cards de Indicadores Estratégicos */}
-      <div className={styles.indicatorGrid}>
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiLabel}>Custos Fixos Mensais (Overhead)</span>
-          <span className={styles.kpiValue}>
-            R$ {fixedOverhead.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </span>
-          <span className={styles.kpiSub}>Estrutura cloud, banco e licenças de dev</span>
+      {/* 3 PILARES VISUAIS ESTRATÉGICOS: CUSTOS vs MARGEM vs META DO MÊS */}
+      <div className={styles.pillarsContainer}>
+        
+        {/* PILAR 1: ESTRUTURA DE CUSTOS (SAÍDAS) */}
+        <div className={`${styles.pillarCard} ${styles.pillarCosts}`}>
+          <div className={styles.pillarHeader}>
+            <div className={styles.pillarTitleGroup}>
+              <TrendingDownOutlinedIcon className={styles.iconCosts} />
+              <div>
+                <span className={styles.pillarBadgeCosts}>Deduções & Saídas</span>
+                <h4 className={styles.pillarTitle}>1. Estrutura de Custos</h4>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.pillarContent}>
+            {/* Custo Fixo Mensal */}
+            <div className={styles.subCard}>
+              <div className={styles.subCardTop}>
+                <span className={styles.subCardLabel}>Custos Fixos Mensais (Overhead)</span>
+                <span className={styles.tagFixed}>Recorrente</span>
+              </div>
+              <div className={styles.subCardValueRow}>
+                <span className={`${styles.subCardValue} ${styles.valCosts}`}>
+                  R$ {fixedOverhead.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+                <span className={styles.subCardUnit}>/ mês</span>
+              </div>
+              <p className={styles.subCardDesc}>
+                Infraestrutura Firebase, banco Firestore, licenças de dev e governança.
+              </p>
+            </div>
+
+            {/* Custo Variável por Cópia */}
+            <div className={styles.subCard}>
+              <div className={styles.subCardTop}>
+                <span className={styles.subCardLabel}>Custo Variável por Cópia</span>
+                <span className={styles.tagVariable}>Por Venda</span>
+              </div>
+              <div className={styles.subCardValueRow}>
+                <span className={`${styles.subCardValue} ${styles.valCosts}`}>
+                  - R$ {totalVariableCosts.toFixed(2)}
+                </span>
+                <span className={styles.subCardUnit}>/ unidade</span>
+              </div>
+              <p className={styles.subCardDesc}>
+                PagBank (R$ 0,95) + Impostos 6% (R$ 0,60) + Banda CDN (R$ 0,10).
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiLabel}>Custo Variável Unitário</span>
-          <span className={styles.kpiValue}>
-            R$ {totalVariableCosts.toFixed(2)}
-          </span>
-          <span className={styles.kpiSub}>Taxa PagBank (R$ 0,95) + Impostos (R$ 0,60) + CDN</span>
+        {/* PILAR 2: MARGEM DE CONTRIBUIÇÃO POR UNIDADE */}
+        <div className={`${styles.pillarCard} ${styles.pillarMargin}`}>
+          <div className={styles.pillarHeader}>
+            <div className={styles.pillarTitleGroup}>
+              <MonetizationOnOutlinedIcon className={styles.iconMargin} />
+              <div>
+                <span className={styles.pillarBadgeMargin}>Rentabilidade Unitária</span>
+                <h4 className={styles.pillarTitle}>2. Margem por Cópia</h4>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.pillarContent}>
+            <div className={styles.marginHeroBox}>
+              <div>
+                <span className={styles.subCardLabel}>Margem de Contribuição (MCU)</span>
+                <div className={styles.marginValueRow}>
+                  <span className={styles.marginHeroValue}>
+                    R$ {unitContributionMargin.toFixed(2)}
+                  </span>
+                  <span className={styles.marginRatioBadge}>{contributionMarginRatio}% de Margem</span>
+                </div>
+              </div>
+
+              {/* Decomposição Visual do Preço de Venda */}
+              <div className={styles.priceBreakdown}>
+                <div className={styles.breakdownHeader}>
+                  <span>Decomposição do Preço de Venda (R$ {unitPrice.toFixed(2)})</span>
+                </div>
+                <div className={styles.breakdownBar}>
+                  <div 
+                    className={styles.barCostPart} 
+                    style={{ width: `${Math.min(100, (totalVariableCosts / unitPrice) * 100)}%` }} 
+                    title={`Custos Variáveis: R$ ${totalVariableCosts.toFixed(2)}`}
+                  />
+                  <div 
+                    className={styles.barMarginPart} 
+                    style={{ width: `${Math.min(100, (unitContributionMargin / unitPrice) * 100)}%` }}
+                    title={`Margem Limpa: R$ ${unitContributionMargin.toFixed(2)}`}
+                  />
+                </div>
+                <div className={styles.breakdownLegend}>
+                  <span className={styles.legendCost}>
+                    ● Custos: R$ {totalVariableCosts.toFixed(2)} ({(100 - parseFloat(contributionMarginRatio)).toFixed(1)}%)
+                  </span>
+                  <span className={styles.legendMargin}>
+                    ● Margem Limpa: R$ {unitContributionMargin.toFixed(2)} ({contributionMarginRatio}%)
+                  </span>
+                </div>
+              </div>
+
+              <p className={styles.subCardDesc}>
+                De cada <strong>R$ {unitPrice.toFixed(2)}</strong> pagos pelo jogador, <strong>R$ {unitContributionMargin.toFixed(2)}</strong> sobram limpos no estúdio para amortizar o overhead e gerar lucro líquido.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiLabel}>Margem de Contribuição (MCU)</span>
-          <span className={`${styles.kpiValue} ${styles.highlightGreen}`}>
-            R$ {unitContributionMargin.toFixed(2)} ({contributionMarginRatio}%)
-          </span>
-          <span className={styles.kpiSub}>Retenção líquida real de cada cópia vendida</span>
+        {/* PILAR 3: META DO MÊS & PONTO DE EQUILÍBRIO */}
+        <div className={`${styles.pillarCard} ${styles.pillarBreakEven}`}>
+          <div className={styles.pillarHeader}>
+            <div className={styles.pillarTitleGroup}>
+              <TrackChangesOutlinedIcon className={styles.iconBreakEven} />
+              <div>
+                <span className={styles.pillarBadgeBreakEven}>Meta de Sobrevivência</span>
+                <h4 className={styles.pillarTitle}>3. Meta do Mês (Break-Even)</h4>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.pillarContent}>
+            <div className={styles.breakEvenHeroBox}>
+              <div>
+                <span className={styles.subCardLabel}>Ponto de Equilíbrio Contábil (PEC)</span>
+                <div className={styles.breakEvenValueRow}>
+                  <span className={styles.breakEvenHeroValue}>
+                    {breakEvenUnits} cópias
+                  </span>
+                  <span className={styles.targetRevenueBadge}>
+                    Meta: R$ {breakEvenRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status e Progresso das Vendas Reais */}
+              <div className={styles.metaStatusBox}>
+                <div className={styles.metaStatusRow}>
+                  <span>Vendas Realizadas no Período:</span>
+                  <strong>{currentSalesCount} / {breakEvenUnits} cópias</strong>
+                </div>
+                <div className={styles.metaProgressBar}>
+                  <div 
+                    className={styles.metaProgressFill} 
+                    style={{ width: `${Math.min(100, Math.round((currentSalesCount / Math.max(breakEvenUnits, 1)) * 100))}%` }} 
+                  />
+                </div>
+                <div className={styles.metaStatusSub}>
+                  {currentSalesCount >= breakEvenUnits ? (
+                    <span style={{ color: '#00d084', fontWeight: 600 }}>
+                      🎉 Ponto de Equilíbrio superado! A partir da {breakEvenUnits + 1}ª cópia, 100% da margem (R$ {unitContributionMargin.toFixed(2)}) é Lucro Operacional Líquido.
+                    </span>
+                  ) : (
+                    <span>
+                      Faltam <strong>{Math.max(0, breakEvenUnits - currentSalesCount)} cópias</strong> para cobrir todos os R$ {fixedOverhead.toFixed(2)} de custos fixos do estúdio.
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <p className={styles.subCardDesc}>
+                Volume mínimo de faturamento (<strong>R$ {breakEvenRevenue.toFixed(2)}</strong>) necessário para o estúdio operar com zero prejuízo no mês.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiLabel}>Ponto de Equilíbrio (Break-Even)</span>
-          <span className={`${styles.kpiValue} ${styles.highlightAmber}`}>
-            {breakEvenUnits} cópias
-          </span>
-          <span className={styles.kpiSub}>
-            Faturamento mínimo: R$ {breakEvenRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </span>
-        </div>
       </div>
 
-      {/* Simulador Interativo de Precificação e Margem */}
+      {/* Simulador Interativo de Sensibilidade de Preço e Custos */}
       <div className={styles.simulatorBlock}>
         <div className={styles.blockHeader}>
-          <h3 className={styles.blockTitle}>Simulador de Margem Real e Sensibilidade de Preço</h3>
+          <div>
+            <h3 className={styles.blockTitle}>Simulador Interativo de Sensibilidade Contábil</h3>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              Altere o preço ou os custos fixos para recalcular instantaneamente a Margem e a Meta de Break-Even
+            </div>
+          </div>
           <span className={styles.formulaBadge}>MCU = Preço Venda - Custos Variáveis</span>
         </div>
 
@@ -117,11 +275,11 @@ export const AdminCosts = () => {
           <button type="submit" className={styles.input} style={{ 
             backgroundColor: 'var(--accent-terracotta)', 
             color: '#fff', 
-            fontWeight: 500, 
+            fontWeight: 600, 
             cursor: 'pointer',
             border: '1px solid var(--accent-terracotta)' 
           }}>
-            Recalcular Margem Real
+            Recalcular Margem & Meta
           </button>
 
           {validationError && (
@@ -135,7 +293,7 @@ export const AdminCosts = () => {
         {/* Tabela de Custos Variáveis */}
         <div className={styles.tableSection}>
           <div className={styles.blockHeader}>
-            <h4 className={styles.blockTitle} style={{ fontSize: '1.1rem' }}>Custos & Despesas Variáveis</h4>
+            <h4 className={styles.blockTitle} style={{ fontSize: '1.1rem' }}>Detalhamento: Custos Variáveis</h4>
           </div>
 
           <table className={styles.dataTable}>
@@ -168,7 +326,7 @@ export const AdminCosts = () => {
         {/* Tabela de Custos Fixos */}
         <div className={styles.tableSection}>
           <div className={styles.blockHeader}>
-            <h4 className={styles.blockTitle} style={{ fontSize: '1.1rem' }}>Custos Fixos Mensais (Overhead)</h4>
+            <h4 className={styles.blockTitle} style={{ fontSize: '1.1rem' }}>Detalhamento: Custos Fixos Mensais</h4>
           </div>
 
           <table className={styles.dataTable}>

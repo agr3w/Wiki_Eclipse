@@ -4,53 +4,383 @@
   gap: 2.5rem;
 }
 
-/* Painel de Indicadores de Margem */
-.indicatorGrid {
+/* ======================================================== */
+/* 3 PILARES VISUAIS ESTRATÉGICOS (CUSTOS / MARGEM / META)  */
+/* ======================================================== */
+
+.pillarsContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
 }
 
-.kpiCard {
+.pillarCard {
   background-color: var(--bg-surface);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  padding: 1.5rem;
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 1. Tema Custos: Vermelho / Terracota suave */
+.pillarCosts {
+  border: 1px solid rgba(239, 83, 80, 0.35);
+  background: linear-gradient(180deg, rgba(239, 83, 80, 0.05) 0%, var(--bg-surface) 35%);
+}
+
+/* 2. Tema Margem: Verde Esmeralda */
+.pillarMargin {
+  border: 1px solid rgba(0, 208, 132, 0.35);
+  background: linear-gradient(180deg, rgba(0, 208, 132, 0.05) 0%, var(--bg-surface) 35%);
+}
+
+/* 3. Tema Meta / Break-Even: Âmbar Dourado */
+.pillarBreakEven {
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.05) 0%, var(--bg-surface) 35%);
+}
+
+/* Cabeçalho do Pilar */
+.pillarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.85rem;
+}
+
+.pillarTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.iconCosts {
+  color: #ef5350 !important;
+  font-size: 1.7rem !important;
+}
+
+.iconMargin {
+  color: #00d084 !important;
+  font-size: 1.7rem !important;
+}
+
+.iconBreakEven {
+  color: #f59e0b !important;
+  font-size: 1.7rem !important;
+}
+
+.pillarBadgeCosts {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: #ef5350;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  display: block;
+}
+
+.pillarBadgeMargin {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: #00d084;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  display: block;
+}
+
+.pillarBadgeBreakEven {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: #f59e0b;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  display: block;
+}
+
+.pillarTitle {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.pillarSubBadge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  background: var(--bg-main);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+/* Conteúdo do Pilar */
+.pillarContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+/* Sub-Cards do Pilar 1 (Custos Fixos e Variáveis) */
+.subCard {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 }
 
-.kpiLabel {
+.subCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subCardLabel {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
 }
 
-.kpiValue {
+.tagFixed {
   font-family: var(--font-mono);
-  font-size: 1.65rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 0.65rem;
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
 }
 
-.highlightGreen {
-  color: #81c784;
+.tagVariable {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  background: rgba(239, 83, 80, 0.15);
+  color: #ef5350;
+  border: 1px solid rgba(239, 83, 80, 0.3);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
 }
 
-.highlightAmber {
-  color: var(--accent-amber);
+.subCardValueRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
 }
 
-.kpiSub {
+.subCardValue {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.valCosts {
+  color: #ef5350;
+}
+
+.valMargin {
+  color: #00d084;
+}
+
+.valBreakEven {
+  color: #f59e0b;
+}
+
+.subCardUnit {
   font-size: 0.75rem;
   color: var(--text-secondary);
-  line-height: 1.4;
+  font-family: var(--font-mono);
 }
 
-/* Simulador Interativo */
+.subCardDesc {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* Destaque Herói do Pilar 2 (Margem Unitária) */
+.marginHeroBox {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.marginValueRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.marginHeroValue {
+  font-family: var(--font-mono);
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #00d084;
+}
+
+.marginRatioBadge {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #00d084;
+  background: rgba(0, 208, 132, 0.15);
+  border: 1px solid rgba(0, 208, 132, 0.35);
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+
+.priceBreakdown {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.breakdownHeader {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.breakdownBar {
+  width: 100%;
+  height: 10px;
+  background-color: #1a1d24;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.barCostPart {
+  height: 100%;
+  background-color: #ef5350;
+  transition: width 0.3s ease;
+}
+
+.barMarginPart {
+  height: 100%;
+  background-color: #00d084;
+  transition: width 0.3s ease;
+}
+
+.breakdownLegend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+}
+
+.legendCost {
+  color: #ef5350;
+}
+
+.legendMargin {
+  color: #00d084;
+  font-weight: 600;
+}
+
+/* Destaque Herói do Pilar 3 (Meta do Mês / Break-Even) */
+.breakEvenHeroBox {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.breakEvenValueRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.breakEvenHeroValue {
+  font-family: var(--font-mono);
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.targetRevenueBadge {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+
+.metaStatusBox {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.metaStatusRow {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+}
+
+.metaProgressBar {
+  width: 100%;
+  height: 8px;
+  background-color: #1a1d24;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metaProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #00d084);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+.metaStatusSub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* ======================================================== */
+/* SIMULADOR INTERATIVO E TABELAS DETALHADAS               */
+/* ======================================================== */
+
 .simulatorBlock {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
@@ -65,6 +395,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .blockTitle {
@@ -175,6 +507,12 @@
   padding-top: 1rem;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+@media (max-width: 1080px) {
+  .pillarsContainer {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 960px) {
