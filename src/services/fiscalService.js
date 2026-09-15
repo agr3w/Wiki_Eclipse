@@ -4,7 +4,7 @@
  */
 
 export const COMPANY_FISCAL_DATA = {
-  razaoSocial: 'THE WAVEM COLLECTIVE DESENVOLVIMENTO DE SOFTWARE LTDA',
+  razaoSocial: 'DESENVOLVIMENTO DE SOFTWARE LTDA',
   nomeFantasia: 'Eclipse Studios & Consultoria TI',
   cnpj: '48.120.934/0001-82',
   inscricaoMunicipal: '104.928-1',
