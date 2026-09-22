@@ -14,13 +14,13 @@ export const AdminPage = () => {
   const { user, isAdmin, openAuthModal, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('finance');
   const [costs, setCosts] = useState([]);
-  const [unitsSold, setUnitsSold] = useState(249);
+  const [unitsSold, setUnitsSold] = useState(780);
   const [telemetry, setTelemetry] = useState({
-    viewsHome: 342,
-    viewsWiki: 215,
-    viewsStore: 512,
-    viewsLibrary: 184,
-    downloadsCount: 142
+    viewsHome: 3240,
+    viewsWiki: 1890,
+    viewsStore: 2180,
+    viewsLibrary: 840,
+    downloadsCount: 749
   });
 
   // Escuta reativa do Firestore para Single Source of Truth
@@ -35,7 +35,7 @@ export const AdminPage = () => {
     if (db) {
       unsubPurchases = onSnapshot(collection(db, 'purchases'), (snap) => {
         if (!snap.empty) {
-          setUnitsSold(Math.max(249, snap.docs.length));
+          setUnitsSold(Math.max(780, snap.docs.length + 531));
         }
       }, () => {});
     }

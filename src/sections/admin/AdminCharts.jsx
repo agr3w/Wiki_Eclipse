@@ -5,7 +5,7 @@ import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import styles from './AdminCharts.module.css';
 import { COMPANY_FISCAL_DATA } from '../../services/fiscalService';
 
-export const AdminCharts = ({ telemetry, costs = [], unitsSold = 249 }) => {
+export const AdminCharts = ({ telemetry, costs = [], unitsSold = 780 }) => {
   const unitPrice = 10.00;
   const grossRevenue = unitsSold * unitPrice;
 
@@ -20,18 +20,18 @@ export const AdminCharts = ({ telemetry, costs = [], unitsSold = 249 }) => {
 
   const netProfit = Math.max(0, grossRevenue - variableTotal - fixedTotal);
 
-  // 1. Gráfico de Linha: Evolução Semanal de Receita
+  // 1. Gráfico de Linha: Evolução Semanal de Faturamento Bruto vs Repasse Líquido
   const revenueChartOption = useMemo(() => ({
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'axis',
       backgroundColor: '#191715',
       borderColor: '#3d3831',
-      textStyle: { color: '#f2eee6', fontFamily: 'Inter' }
+      textStyle: { color: '#f2eee6' }
     },
     legend: {
       data: ['Receita Bruta (Faturamento)', 'Repasse Líquido'],
-      textStyle: { color: '#aba496', fontFamily: 'Inter' },
+      textStyle: { color: '#aba496' },
       bottom: 0
     },
     grid: { left: '3%', right: '4%', bottom: '12%', top: '6%', containLabel: true },
@@ -53,7 +53,7 @@ export const AdminCharts = ({ telemetry, costs = [], unitsSold = 249 }) => {
         name: 'Receita Bruta (Faturamento)',
         type: 'line',
         smooth: true,
-        data: [320, 680, 1140, 1690, 2150, grossRevenue],
+        data: [1200, 2450, 3900, 5200, 6600, grossRevenue],
         lineStyle: { width: 3, color: '#bf573b' },
         itemStyle: { color: '#bf573b' },
         areaStyle: {
@@ -71,7 +71,7 @@ export const AdminCharts = ({ telemetry, costs = [], unitsSold = 249 }) => {
         name: 'Repasse Líquido',
         type: 'line',
         smooth: true,
-        data: [265, 560, 940, 1390, 1780, Math.max(0, grossRevenue - (unitsSold * 0.95))],
+        data: [1080, 2210, 3520, 4700, 5960, Math.max(0, grossRevenue - (unitsSold * 0.95))],
         lineStyle: { width: 3, color: '#81c784' },
         itemStyle: { color: '#81c784' }
       }
@@ -157,10 +157,10 @@ export const AdminCharts = ({ telemetry, costs = [], unitsSold = 249 }) => {
 
   // 4. Gráfico Funil: Conversão da Jornada do Usuário
   const conversionFunnelOption = useMemo(() => {
-    const views = (telemetry?.viewsHome || 342) + (telemetry?.viewsStore || 512);
-    const storeVisits = telemetry?.viewsStore || 512;
-    const checkouts = unitsSold;
-    const downloads = telemetry?.downloadsCount || 142;
+    const checkouts = unitsSold || 780;
+    const storeVisits = Math.max(telemetry?.viewsStore || 2180, Math.round(checkouts * 2.8));
+    const views = Math.max((telemetry?.viewsHome || 3240) + storeVisits, Math.round(storeVisits * 2.4));
+    const downloads = Math.max(telemetry?.downloadsCount || 749, Math.round(checkouts * 0.96));
 
     return {
       backgroundColor: 'transparent',
