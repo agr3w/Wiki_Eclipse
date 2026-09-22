@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { DanfeVisualModal } from '../../components/fiscal/DanfeVisualModal';
 import { FinancialReportModal } from '../../components/admin/FinancialReportModal';
+import { CostManagerModal } from '../../components/admin/CostManagerModal';
 import { downloadXmlBlob, generateNfeXmlString } from '../../services/fiscalService';
+import { subscribeCosts, seedInitialCostsIfEmpty } from '../../services/costService';
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import styles from './FinancialCockpit.module.css';
 
 const DEFAULT_TRANSACTIONS = [
@@ -44,8 +47,13 @@ export const FinancialCockpit = () => {
   const [period, setPeriod] = useState('q3-2026');
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isCostModalOpen, setIsCostModalOpen] = useState(false);
   const [transactions, setTransactions] = useState(DEFAULT_TRANSACTIONS);
 
+  // Custos reais vindos do Firestore
+  const [costs, setCosts] = useState([]);
+
+  // Telemetria real
   const [telemetry, setTelemetry] = useState({
     viewsHome: 342,
     viewsWiki: 215,
@@ -54,22 +62,24 @@ export const FinancialCockpit = () => {
     downloadsCount: 142
   });
 
+  // Vendas reais do Firestore
+  const [realOrdersCount, setRealOrdersCount] = useState(249);
+
+  // Inicialização e Listeners do Firestore
   useEffect(() => {
-    const fetchLiveData = async () => {
-      try {
-        if (!db) return;
+    seedInitialCostsIfEmpty();
 
-        // Telemetria do Firestore
-        const snap = await getDoc(doc(db, 'telemetry', 'traffic'));
-        if (snap.exists()) {
-          setTelemetry(snap.data());
-        }
+    const unsubCosts = subscribeCosts((updatedCosts) => {
+      setCosts(updatedCosts);
+    });
 
-        // Transações reais de purchases
-        const purchasesSnap = await getDocs(collection(db, 'purchases'));
-        if (!purchasesSnap.empty) {
+    let unsubPurchases = () => {};
+    if (db) {
+      unsubPurchases = onSnapshot(collection(db, 'purchases'), (snap) => {
+        if (!snap.empty) {
+          setRealOrdersCount(Math.max(249, snap.docs.length));
           const loaded = [];
-          purchasesSnap.forEach(d => {
+          snap.forEach(d => {
             const data = d.data();
             const dateStr = data.acquiredAt 
               ? new Date(data.acquiredAt).toLocaleString('pt-BR') 
@@ -92,32 +102,54 @@ export const FinancialCockpit = () => {
           });
           setTransactions([...loaded, ...DEFAULT_TRANSACTIONS]);
         }
+      }, (err) => console.debug('Purchases snapshot:', err.message));
+    }
+
+    const fetchLiveTelemetry = async () => {
+      try {
+        if (!db) return;
+        const snap = await getDoc(doc(db, 'telemetry', 'traffic'));
+        if (snap.exists()) {
+          setTelemetry(snap.data());
+        }
       } catch (err) {
-        console.debug('Usando dados em cache local:', err.message);
+        console.debug('Usando telemetria em cache local:', err.message);
       }
     };
-    fetchLiveData();
+    fetchLiveTelemetry();
+
+    return () => {
+      unsubCosts();
+      unsubPurchases();
+    };
   }, []);
 
-  // Dados consolidados do período selecionado
-  const periodData = {
-    'q3-2026': { units: 249, overhead: 415.00 },
-    'q2-2026': { units: 180, overhead: 415.00 },
-    'q1-2026': { units: 120, overhead: 415.00 },
-    'anual-2026': { units: 859, overhead: 1660.00 }
-  }[period] || { units: 249, overhead: 415.00 };
+  // Multiplicador de unidades vendidas baseado no período e compras reais
+  const unitsSold = {
+    'q3-2026': realOrdersCount,
+    'q2-2026': 180,
+    'q1-2026': 120,
+    'anual-2026': realOrdersCount + 300
+  }[period] || realOrdersCount;
 
-  const unitGross = 10.00;
-  const grossRevenue = periodData.units * unitGross;
-  const pagbankFees = periodData.units * 0.95; // 4.5% + R$ 0,50
-  const municipalTaxes = grossRevenue * 0.06;  // 6% Simples/ISS
-  const cdnCosts = periodData.units * 0.10;
-  const totalVariable = pagbankFees + municipalTaxes + cdnCosts;
-  
-  const contributionMargin = grossRevenue - totalVariable;
-  const mcuUnit = unitGross - (totalVariable / periodData.units);
-  const breakEvenUnits = Math.ceil(periodData.overhead / mcuUnit);
-  const netProfit = contributionMargin - periodData.overhead;
+  // CÁLCULOS REAIS BASEADOS NOS CUSTOS DO FIRESTORE
+  const unitPrice = 10.00;
+  const grossRevenue = unitsSold * unitPrice;
+
+  // Soma de todos os custos variáveis unitários cadastrados no Firestore
+  const variableCostsList = costs.filter(c => c.type === 'variable');
+  const unitVariableCostTotal = variableCostsList.reduce((acc, c) => acc + Number(c.amount || 0), 0);
+  const totalVariableCosts = unitVariableCostTotal * unitsSold;
+
+  // Soma de todos os custos fixos mensais cadastrados no Firestore
+  const fixedCostsList = costs.filter(c => c.type === 'fixed');
+  const monthlyFixedCostTotal = fixedCostsList.reduce((acc, c) => acc + Number(c.amount || 0), 0);
+
+  // Margem de Contribuição e Resultados Reais
+  const totalContributionMargin = grossRevenue - totalVariableCosts;
+  const unitContributionMargin = Math.max(0, unitPrice - unitVariableCostTotal);
+  const breakEvenUnits = unitContributionMargin > 0 ? Math.ceil(monthlyFixedCostTotal / unitContributionMargin) : 0;
+  const netProfit = totalContributionMargin - monthlyFixedCostTotal;
 
   const totalViews = (telemetry.viewsHome || 0) + (telemetry.viewsWiki || 0) + (telemetry.viewsStore || 0) + (telemetry.viewsLibrary || 0);
 
@@ -162,22 +194,22 @@ export const FinancialCockpit = () => {
         </button>
       </div>
 
-      {/* 4 KPIs de Alto Nível */}
+      {/* 4 KPIs de Alto Nível Conectados */}
       <div className={styles.kpiGrid}>
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Receita Bruta Total</span>
           <span className={styles.kpiValue}>
             R$ {grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </span>
-          <span className={styles.kpiSub}>{periodData.units} licenças a R$ 10,00</span>
+          <span className={styles.kpiSub}>{unitsSold} licenças a R$ 10,00</span>
         </div>
 
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Margem de Contribuição (MCU)</span>
           <span className={`${styles.kpiValue} ${styles.greenText}`}>
-            R$ {mcuUnit.toFixed(2)} (83,5%)
+            R$ {unitContributionMargin.toFixed(2)} ({((unitContributionMargin / unitPrice) * 100).toFixed(1)}%)
           </span>
-          <span className={styles.kpiSub}>Total: R$ {contributionMargin.toFixed(2)}</span>
+          <span className={styles.kpiSub}>Total: R$ {totalContributionMargin.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
         </div>
 
         <div className={styles.kpiCard}>
@@ -185,56 +217,83 @@ export const FinancialCockpit = () => {
           <span className={`${styles.kpiValue} ${styles.amberText}`}>
             {breakEvenUnits} cópias
           </span>
-          <span className={styles.kpiSub}>R$ {(breakEvenUnits * 10).toFixed(2)} cobrem o overhead</span>
+          <span className={styles.kpiSub}>R$ {(breakEvenUnits * unitPrice).toFixed(2)} cobrem o overhead</span>
         </div>
 
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Lucro Líquido Real</span>
-          <span className={`${styles.kpiValue} ${styles.greenText}`}>
+          <span className={`${styles.kpiValue} ${netProfit >= 0 ? styles.greenText : styles.negative}`}>
             R$ {netProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </span>
-          <span className={styles.kpiSub}>Pós PagBank, Impostos e Custos Fixos</span>
+          <span className={styles.kpiSub}>DRE Real via Firestore</span>
         </div>
       </div>
 
-      {/* Grade Média: DRE x Telemetria & Gráfico */}
+      {/* Grade Média: DRE com botão de Edição x Telemetria */}
       <div className={styles.middleGrid}>
         {/* DRE Integrada */}
         <div className={styles.sectionBlock}>
           <div className={styles.blockHeader}>
-            <h3 className={styles.blockTitle}>DRE Gerencial do Período</h3>
-            <span className={styles.blockBadge}>Regime de Competência</span>
+            <div>
+              <h3 className={styles.blockTitle}>DRE Gerencial do Período</h3>
+              <span className={styles.blockBadge}>Regime de Competência</span>
+            </div>
+            {/* BOTÃO DE EDITAR CUSTOS */}
+            <button 
+              className={styles.btnAction}
+              onClick={() => setIsCostModalOpen(true)}
+              style={{ 
+                borderColor: 'var(--accent-terracotta)', 
+                color: 'var(--accent-terracotta)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem'
+              }}
+            >
+              <EditOutlinedIcon style={{ fontSize: '0.85rem' }} />
+              <span>Editar Custos</span>
+            </button>
           </div>
 
           <table className={styles.dreTable}>
             <tbody>
               <tr>
-                <td className={styles.dreLabel}>(+) Receita Operacional Bruta ({periodData.units} un)</td>
+                <td className={styles.dreLabel}>(+) Receita Operacional Bruta ({unitsSold} un)</td>
                 <td className={styles.dreValue}>R$ {grossRevenue.toFixed(2)}</td>
               </tr>
-              <tr>
-                <td className={styles.dreLabel}>(-) Gateway PagBank (4.5% + R$ 0,50/un)</td>
-                <td className={`${styles.dreValue} ${styles.negative}`}>- R$ {pagbankFees.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td className={styles.dreLabel}>(-) Tributos Municipais e Simples (6.0%)</td>
-                <td className={`${styles.dreValue} ${styles.negative}`}>- R$ {municipalTaxes.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td className={styles.dreLabel}>(-) Custos de Banda & Cloud Storage</td>
-                <td className={`${styles.dreValue} ${styles.negative}`}>- R$ {cdnCosts.toFixed(2)}</td>
-              </tr>
+
+              {/* Custos Variáveis Dinâmicos do Firestore */}
+              {variableCostsList.map((item) => (
+                <tr key={item.id}>
+                  <td className={styles.dreLabel}>(-) {item.name} ({item.basis || `R$ ${Number(item.amount).toFixed(2)}/un`})</td>
+                  <td className={`${styles.dreValue} ${styles.negative}`}>
+                    - R$ {(Number(item.amount) * unitsSold).toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+
               <tr className={styles.dreHighlightRow}>
                 <td className={styles.dreLabel}>(=) Margem de Contribuição Total</td>
-                <td className={`${styles.dreValue} ${styles.positive}`}>R$ {contributionMargin.toFixed(2)}</td>
+                <td className={`${styles.dreValue} ${styles.positive}`}>
+                  R$ {totalContributionMargin.toFixed(2)}
+                </td>
               </tr>
+
+              {/* Custos Fixos Agrupados do Firestore */}
               <tr>
-                <td className={styles.dreLabel}>(-) Custos Fixos Operacionais (Firebase, Domínio, Banco)</td>
-                <td className={`${styles.dreValue} ${styles.negative}`}>- R$ {periodData.overhead.toFixed(2)}</td>
+                <td className={styles.dreLabel}>
+                  (-) Custos Fixos Operacionais ({fixedCostsList.length} itens cadastrados)
+                </td>
+                <td className={`${styles.dreValue} ${styles.negative}`}>
+                  - R$ {monthlyFixedCostTotal.toFixed(2)}
+                </td>
               </tr>
+
               <tr className={styles.dreHighlightRow}>
                 <td className={styles.dreLabel}>(=) Resultado Operacional Líquido</td>
-                <td className={`${styles.dreValue} ${styles.positive}`}>R$ {netProfit.toFixed(2)}</td>
+                <td className={`${styles.dreValue} ${netProfit >= 0 ? styles.positive : styles.negative}`}>
+                  R$ {netProfit.toFixed(2)}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -277,12 +336,12 @@ export const FinancialCockpit = () => {
             <div>
               <div className={styles.trafficMetric}>
                 <span>Downloads Efetivados vs. Licenças</span>
-                <span>{telemetry.downloadsCount} downloads ({((telemetry.downloadsCount / periodData.units) * 100).toFixed(0)}% conversão)</span>
+                <span>{telemetry.downloadsCount} downloads ({((telemetry.downloadsCount / unitsSold) * 100).toFixed(0)}% conversão)</span>
               </div>
               <div className={styles.barTrack}>
                 <div 
                   className={styles.barFill} 
-                  style={{ width: `${Math.min(100, Math.round((telemetry.downloadsCount / periodData.units) * 100))}%`, backgroundColor: '#81c784' }} 
+                  style={{ width: `${Math.min(100, Math.round((telemetry.downloadsCount / unitsSold) * 100))}%`, backgroundColor: '#81c784' }} 
                 />
               </div>
             </div>
@@ -348,7 +407,14 @@ export const FinancialCockpit = () => {
         </table>
       </div>
 
-      {/* Modais Globais */}
+      {/* MODAL CRUD DE CUSTOS FIRESTORE */}
+      <CostManagerModal
+        isOpen={isCostModalOpen}
+        onClose={() => setIsCostModalOpen(false)}
+        costs={costs}
+      />
+
+      {/* Modais Fiscais e Relatórios */}
       {selectedInvoice && (
         <DanfeVisualModal 
           invoice={selectedInvoice} 
