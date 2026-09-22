@@ -15,10 +15,6 @@ export const Hero = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className={styles.badge}>
-          <span className={styles.badgeDot} />
-          PROJETO ACADÊMICO • GODOT 4.7 • LICENÇA ABERTA
-        </div>
 
         <h1 className={styles.title}>
           Eclipse: Ecos do Abismo

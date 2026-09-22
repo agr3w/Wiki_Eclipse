@@ -37,28 +37,6 @@
   align-items: center;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--radius-full);
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  letter-spacing: 0.04em;
-  margin-bottom: 2rem;
-}
-
-.badgeDot {
-  width: 6px;
-  height: 6px;
-  background-color: var(--accent-terracotta);
-  border-radius: 50%;
-}
-
 .title {
   font-family: var(--font-serif);
   font-size: clamp(2.5rem, 5vw, 4.2rem);

@@ -145,15 +145,19 @@ export const fetchAdminMetrics = async (dateRange = null) => {
         dateObj,
         dateFormatted: dateObj.toLocaleString('pt-BR'),
         date: dateObj.toLocaleString('pt-BR'),
-        customerName: data.billingName || data.userEmail?.split('@')[0] || 'Sentinela',
-        customerEmail: data.userEmail || '—',
+        customerName: data.billingName || data.customerName || data.userEmail?.split('@')[0] || 'Sentinela',
+        customerEmail: data.userEmail || data.customerEmail || '—',
         paymentMethod: data.paymentMethod || 'PIX Instantâneo',
         grossValue,
         gatewayFee,
         taxWithheld,
         netValue,
         nfeStatus: 'Emitida',
-        nfeNumber: `NFS-e ${data.orderProtocol || docSnap.id.slice(0, 6)}`
+        nfeNumber: data.nfeNumber ? `NF-e ${data.nfeNumber}` : `NFS-e ${data.orderProtocol || docSnap.id.slice(0, 6)}`,
+        rawNfeNumber: data.nfeNumber || data.orderProtocol?.replace(/\D/g, '') || '142',
+        accessKey: data.accessKey || '',
+        sefazProtocol: data.sefazProtocol || '',
+        xmlString: data.xmlString || ''
       });
     });
 
@@ -377,14 +381,27 @@ export const fetchRealInvoices = async (dateRange = null) => {
   if (!transactions || transactions.length === 0) return INVOICES_LEDGER;
 
   return transactions.map((t) => ({
-    nfeNumber: t.nfeNumber || `NFS-e ${t.id}`,
+    nfeNumber: t.nfeNumber || `NF-e ${t.id}`,
+    rawNfeNumber: t.rawNfeNumber || t.id,
+    number: t.rawNfeNumber || t.id,
     issueDate: t.dateFormatted ? t.dateFormatted.split(' ')[0] : new Date().toLocaleDateString('pt-BR'),
     customer: t.customerName,
+    customerName: t.customerName,
+    customerEmail: t.customerEmail,
     cnpjCpf: '000.***.***-00',
     serviceDescription: 'Licenciamento de Software de Jogo Eletrônico 2D (Eclipse: Ecos do Abismo)',
     grossAmount: t.grossValue,
+    grossValue: t.grossValue,
+    gatewayFee: t.gatewayFee,
+    netAmount: t.netValue,
+    netValue: t.netValue,
     issRetention: t.taxWithheld / 2,
     simplesTax: t.taxWithheld / 2,
-    status: 'Autorizada SEFAZ'
+    status: 'Autorizada SEFAZ',
+    accessKey: t.accessKey,
+    sefazProtocol: t.sefazProtocol,
+    xmlString: t.xmlString,
+    paymentMethod: t.paymentMethod,
+    orderProtocol: t.id
   }));
 };

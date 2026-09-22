@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
 import { auth, db, isFirebaseConfigured } from '../services/firebaseConfig';
+import { generateNfeAccessKey, generateNfeXmlString } from '../services/fiscalService';
 
 const AuthContext = createContext({});
 
@@ -140,9 +141,29 @@ export const AuthProvider = ({ children }) => {
     if (!user) return null;
     
     const orderProtocol = `ECL-${Date.now().toString().slice(-6)}`;
-    const grossValue = checkoutData.grossAmount || 10.00;
+    const grossAmount = checkoutData.grossAmount || 10.00;
     const gatewayFee = checkoutData.gatewayFee || 0.95;
-    const netValue = checkoutData.netAmount || (grossValue - gatewayFee);
+    const netAmount = checkoutData.netAmount || (grossAmount - gatewayFee);
+
+    const nfeNumber = Math.floor(100 + Math.random() * 900).toString();
+    const accessKey = generateNfeAccessKey('42', '26', '09', '48120934000182', '55', '001', nfeNumber);
+    const sefazProtocol = `1422600${Math.floor(10000000 + Math.random() * 90000000)}`;
+
+    const invoicePayload = {
+      nfeNumber,
+      accessKey,
+      sefazProtocol,
+      grossAmount,
+      grossValue: grossAmount,
+      gatewayFee,
+      netAmount,
+      netValue: netAmount,
+      customerName: checkoutData.billingName || user.displayName || user.email?.split('@')[0],
+      customerEmail: user.email,
+      paymentMethod: checkoutData.paymentMethod || 'PIX Instantâneo'
+    };
+
+    const xmlString = generateNfeXmlString(invoicePayload);
 
     const purchaseRecord = {
       orderProtocol,
@@ -150,23 +171,20 @@ export const AuthProvider = ({ children }) => {
       userEmail: user.email,
       gameId: 'eclipse-ecos-do-abismo',
       gameTitle: 'Eclipse: Ecos do Abismo',
-      price: `R$ ${grossValue.toFixed(2)}`,
-      grossValue,
-      gatewayFee,
-      netValue,
-      paymentMethod: checkoutData.paymentMethod || 'PIX Instantâneo',
-      billingName: checkoutData.billingName || user.displayName || user.email?.split('@')[0],
+      price: `R$ ${grossAmount.toFixed(2)}`,
+      status: 'completed',
+      acquiredAt: new Date().toISOString(),
       invoiceRecipientEmail: user.email,
       gatewayProvider: checkoutData.gatewayProvider || 'PagBank Sandbox Enterprise',
-      status: 'completed',
-      acquiredAt: new Date().toISOString()
+      ...invoicePayload,
+      xmlString // XML 4.00 persistido como texto no Firestore
     };
 
     if (db) {
       // 1. Gravar registro permanente da transação na coleção 'purchases'
       await addDoc(collection(db, 'purchases'), {
         ...purchaseRecord,
-        acquiredAt: serverTimestamp()
+        acquiredAtServer: serverTimestamp()
       });
 
       // 2. Atualizar ou criar status hasLicense: true no documento 'users/{uid}' com merge: true

@@ -1,0 +1,313 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(9, 10, 12, 0.92);
+  backdrop-filter: blur(10px);
+  z-index: 140;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modalContainer {
+  width: 100%;
+  max-width: 900px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+}
+
+/* Barra de Ações Superior */
+.actionBar {
+  background-color: var(--bg-main);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btnAction {
+  padding: 0.45rem 0.9rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all var(--transition-fast);
+}
+
+.btnAction:hover {
+  border-color: var(--accent-terracotta);
+  color: var(--accent-terracotta);
+}
+
+.btnClose {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.btnClose:hover {
+  color: var(--text-primary);
+}
+
+/* Área de Rolagem do Papel */
+.scrollViewport {
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: #2b2b2d;
+  display: flex;
+  justify-content: center;
+}
+
+/* Folha Oficial DANFE */
+.danfeSheet {
+  width: 100%;
+  max-width: 790px;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: 'Arial', sans-serif;
+  padding: 1.5rem;
+  border: 1px solid #000000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+/* Canhoto de Recebimento */
+.canhoto {
+  border: 1px solid #000000;
+  padding: 0.4rem;
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 2px dashed #000000;
+  padding-bottom: 0.6rem;
+}
+
+.canhotoAssinatura {
+  border-top: 1px solid #000000;
+  margin-top: 1.5rem;
+  font-size: 8px;
+  text-align: center;
+}
+
+/* Cabeçalho da DANFE */
+.headerGrid {
+  display: grid;
+  grid-template-columns: 240px 110px 1fr;
+  border: 1.5px solid #000000;
+  margin-bottom: -1.5px;
+}
+
+.emitterBox {
+  padding: 0.5rem;
+  border-right: 1.5px solid #000000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.emitterTitle {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.emitterSub {
+  font-size: 8.5px;
+  color: #222222;
+  margin-top: 2px;
+}
+
+.danfeIdent {
+  padding: 0.4rem;
+  border-right: 1.5px solid #000000;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.danfeIdent h3 {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.typeBadge {
+  border: 1px solid #000000;
+  display: inline-block;
+  padding: 1px 6px;
+  font-weight: bold;
+  margin: 2px auto;
+}
+
+.barcodeArea {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.barcodeSimulated {
+  height: 38px;
+  width: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    #000 0px,
+    #000 2px,
+    #fff 2px,
+    #fff 4px,
+    #000 4px,
+    #000 7px,
+    #fff 7px,
+    #fff 8px
+  );
+  margin-bottom: 4px;
+}
+
+.keyLabel {
+  font-size: 7.5px;
+  text-transform: uppercase;
+  color: #333333;
+}
+
+.keyValue {
+  font-family: 'Courier New', monospace;
+  font-size: 9.5px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* Blocos Técnicos */
+.block {
+  border: 1.5px solid #000000;
+  margin-bottom: -1.5px;
+  padding: 0.4rem 0.5rem;
+}
+
+.blockTitle {
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background-color: #e8e8e8;
+  padding: 2px 4px;
+  margin: -0.4rem -0.5rem 0.35rem -0.5rem;
+  border-bottom: 1px solid #000000;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.grid5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+  text-align: right;
+}
+
+.fieldLabel {
+  font-size: 7.5px;
+  text-transform: uppercase;
+  color: #444444;
+  display: block;
+}
+
+.fieldValue {
+  font-size: 9.5px;
+  font-weight: 600;
+}
+
+/* Tabela de Produtos / Serviços */
+.itemsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9px;
+  margin-top: 2px;
+}
+
+.itemsTable th {
+  border: 1px solid #000000;
+  background-color: #f2f2f2;
+  padding: 3px 4px;
+  text-transform: uppercase;
+  font-size: 7.5px;
+}
+
+.itemsTable td {
+  border: 1px solid #000000;
+  padding: 4px;
+}
+
+/* Dados Adicionais */
+.infAdicText {
+  font-size: 8.5px;
+  line-height: 1.35;
+  color: #111111;
+  min-height: 48px;
+  white-space: pre-line;
+}
+
+/* Estilos de Impressão Direta */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .danfeSheet, .danfeSheet * {
+    visibility: visible !important;
+  }
+  .modalOverlay {
+    position: absolute;
+    inset: 0;
+    background: none;
+    padding: 0;
+  }
+  .modalContainer {
+    max-width: 100%;
+    border: none;
+    box-shadow: none;
+  }
+  .actionBar {
+    display: none !important;
+  }
+  .scrollViewport {
+    background: none;
+    padding: 0;
+    overflow: visible;
+  }
+  .danfeSheet {
+    box-shadow: none;
+    border: 1.5px solid #000;
+    padding: 10mm;
+    margin: 0 auto;
+  }
+}

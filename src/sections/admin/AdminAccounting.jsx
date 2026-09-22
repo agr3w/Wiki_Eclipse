@@ -8,8 +8,9 @@ import {
 import { fetchAdminMetrics, fetchRealTransactions, fetchRealInvoices } from '../../services/adminService';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { DanfseModal } from '../../components/fiscal/DanfseModal';
-import { downloadXmlFile } from '../../services/fiscalService';
+import { DanfeVisualModal } from '../../components/fiscal/DanfeVisualModal';
+import { FinancialReportModal } from '../../components/admin/FinancialReportModal';
+import { downloadXmlBlob, generateNfeXmlString } from '../../services/fiscalService';
 import styles from './AdminAccounting.module.css';
 
 export const AdminAccounting = () => {
@@ -17,6 +18,7 @@ export const AdminAccounting = () => {
   const [transactions, setTransactions] = useState(RECENT_TRANSACTIONS);
   const [invoices, setInvoices] = useState(INVOICES_LEDGER);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -38,19 +40,31 @@ export const AdminAccounting = () => {
     loadData();
   }, []);
 
-  const handleOpenNfse = (nfeData) => {
+  const handleOpenDanfe = (nfeData) => {
     setSelectedInvoice({
-      number: nfeData.nfeNumber || 'NFS-1001',
-      issueDate: nfeData.issueDate || '15/09/2026',
-      issueTime: '10:45:12',
-      verificationCode: 'A9F3-481B-902C-71ED',
+      ...nfeData,
+      nfeNumber: nfeData.rawNfeNumber || nfeData.nfeNumber || '142',
+      number: nfeData.rawNfeNumber || nfeData.nfeNumber || '142',
+      issueDate: nfeData.issueDate || new Date().toLocaleDateString('pt-BR'),
+      accessKey: nfeData.accessKey,
+      sefazProtocol: nfeData.sefazProtocol,
       customerName: nfeData.customer || nfeData.customerName || 'Consumidor Final',
       customerEmail: nfeData.customerEmail || 'cliente.adquirente@gmail.com',
       serviceDescription: nfeData.serviceDescription || 'Licenciamento de Software de Jogo Eletrônico 2D (Eclipse: Ecos do Abismo)',
       grossAmount: typeof nfeData.grossAmount === 'number' ? nfeData.grossAmount : 10.00,
       paymentMethod: nfeData.paymentMethod || 'PagBank Sandbox (Cartão/PIX)',
-      orderProtocol: nfeData.orderProtocol || 'ECL-9482'
+      orderProtocol: nfeData.orderProtocol || 'ECL-9482',
+      xmlString: nfeData.xmlString
     });
+  };
+
+  const handleDownloadXml = (nfe) => {
+    if (nfe.xmlString) {
+      downloadXmlBlob(nfe.xmlString, nfe.rawNfeNumber || nfe.nfeNumber || '142');
+    } else {
+      const generated = generateNfeXmlString(nfe);
+      downloadXmlBlob(generated, nfe.rawNfeNumber || nfe.nfeNumber || '142');
+    }
   };
 
   if (loading) {
@@ -69,26 +83,48 @@ export const AdminAccounting = () => {
           <CheckCircleOutlineIcon style={{ fontSize: '1rem' }} />
           <span>Apuração Contábil & Fiscal baseada no Cloud Firestore</span>
         </div>
-        <button 
-          onClick={loadData}
-          disabled={refreshing}
-          style={{
-            background: 'transparent',
-            border: '1px solid var(--border-default)',
-            color: 'var(--text-secondary)',
-            padding: '0.35rem 0.75rem',
-            borderRadius: 'var(--radius-sm)',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.75rem',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.35rem'
-          }}
-        >
-          <RefreshOutlinedIcon style={{ fontSize: '1rem', animation: refreshing ? 'ringRotate 1s linear infinite' : 'none' }} />
-          <span>{refreshing ? 'Atualizando...' : 'Atualizar Livros'}</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+          <button 
+            onClick={() => setIsReportOpen(true)}
+            style={{
+              background: 'linear-gradient(135deg, #1b5e20, #2e7d32)',
+              border: '1px solid #4caf50',
+              color: '#ffffff',
+              padding: '0.4rem 0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              boxShadow: '0 2px 8px rgba(46, 125, 50, 0.3)'
+            }}
+          >
+            <span>📊 Relatório Executivo (PDF / DRE)</span>
+          </button>
+          <button 
+            onClick={loadData}
+            disabled={refreshing}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border-default)',
+              color: 'var(--text-secondary)',
+              padding: '0.35rem 0.75rem',
+              borderRadius: 'var(--radius-sm)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.75rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem'
+            }}
+          >
+            <RefreshOutlinedIcon style={{ fontSize: '1rem', animation: refreshing ? 'ringRotate 1s linear infinite' : 'none' }} />
+            <span>{refreshing ? 'Atualizando...' : 'Atualizar Livros'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Demonstrativo Contábil Simplificado (DRE) */}
@@ -200,20 +236,12 @@ export const AdminAccounting = () => {
                 </td>
                 <td>
                   <div style={{ display: 'flex', gap: '0.4rem' }}>
-                    <button className={styles.btnAction} onClick={() => handleOpenNfse(nfe)}>
+                    <button className={styles.btnAction} onClick={() => handleOpenDanfe(nfe)}>
                       Visualizar DANFE
                     </button>
                     <button 
                       className={styles.btnAction} 
-                      onClick={() => downloadXmlFile({
-                        number: nfe.nfeNumber,
-                        issueDate: nfe.issueDate,
-                        verificationCode: 'A9F3-481B-902C-71ED',
-                        customerName: nfe.customer,
-                        customerEmail: nfe.customerEmail || 'cliente@gmail.com',
-                        serviceDescription: nfe.serviceDescription,
-                        grossAmount: nfe.grossAmount
-                      })}
+                      onClick={() => handleDownloadXml(nfe)}
                     >
                       XML
                     </button>
@@ -225,13 +253,19 @@ export const AdminAccounting = () => {
         </table>
       </div>
 
-      {/* Modal Fidedigno do Espelho DANFSE */}
+      {/* Modal Visual Fidedigno da DANFE (Padrão SEFAZ NF-e 4.00) */}
       {selectedInvoice && (
-        <DanfseModal 
+        <DanfeVisualModal 
           invoice={selectedInvoice} 
           onClose={() => setSelectedInvoice(null)} 
         />
       )}
+
+      {/* Modal Executivo de Relatório Financeiro (DRE Trimestral/Anual & PDF) */}
+      <FinancialReportModal 
+        isOpen={isReportOpen} 
+        onClose={() => setIsReportOpen(false)} 
+      />
     </div>
   );
 };

@@ -60,20 +60,6 @@ export const Profile = () => {
               <div className={styles.userEmailSub}>{user.email}</div>
             </div>
           </div>
-
-          <div>
-            {user.hasLicense ? (
-              <div className={`${styles.licensePill} ${styles.licenseActive}`}>
-                <VerifiedUserOutlinedIcon style={{ fontSize: '1rem' }} />
-                <span>Licença Ativa</span>
-              </div>
-            ) : (
-              <div className={`${styles.licensePill} ${styles.licensePending}`}>
-                <HourglassEmptyOutlinedIcon style={{ fontSize: '1rem' }} />
-                <span>Sem Licença</span>
-              </div>
-            )}
-          </div>
         </header>
 
         {/* Abas com Ícones MUI */}

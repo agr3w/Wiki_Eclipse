@@ -8,6 +8,7 @@ import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
 import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
+import { DanfeVisualModal } from '../../components/fiscal/DanfeVisualModal';
 import styles from './PagBankGatewayPage.module.css';
 
 export const PagBankGatewayPage = () => {
@@ -23,6 +24,8 @@ export const PagBankGatewayPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
   const [transactionProtocol, setTransactionProtocol] = useState('');
+  const [issuedInvoice, setIssuedInvoice] = useState(null);
+  const [showDanfe, setShowDanfe] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [countdown, setCountdown] = useState(6);
 
@@ -62,6 +65,7 @@ export const PagBankGatewayPage = () => {
       });
 
       setTransactionProtocol(order?.orderProtocol || `PAG-${Date.now().toString().slice(-6)}`);
+      setIssuedInvoice(order);
       setIsProcessing(false);
       setIsApproved(true);
     } catch (err) {
@@ -71,16 +75,16 @@ export const PagBankGatewayPage = () => {
     }
   };
 
-  // Redirecionamento automático suave após aprovação
+  // Redirecionamento automático suave após aprovação (pausado se a DANFE estiver aberta)
   useEffect(() => {
     let timer;
-    if (isApproved && countdown > 0) {
+    if (isApproved && !showDanfe && countdown > 0) {
       timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
-    } else if (isApproved && countdown === 0) {
+    } else if (isApproved && !showDanfe && countdown === 0) {
       navigate('/biblioteca');
     }
     return () => clearTimeout(timer);
-  }, [isApproved, countdown, navigate]);
+  }, [isApproved, showDanfe, countdown, navigate]);
 
   return (
     <div className={styles.pageContainer}>
@@ -366,7 +370,7 @@ export const PagBankGatewayPage = () => {
             <div className={styles.receiptDetails}>
               <div className={styles.receiptRow}>
                 <span>Estabelecimento:</span>
-                <span className={styles.receiptValue}>The Wavem Collective</span>
+                <span className={styles.receiptValue}>Collective</span>
               </div>
               <div className={styles.receiptRow}>
                 <span>Data e Hora:</span>
@@ -388,14 +392,42 @@ export const PagBankGatewayPage = () => {
               </div>
             </div>
 
-            <button 
-              type="button" 
-              className={styles.btnReturn}
-              onClick={() => navigate('/biblioteca')}
-            >
-              Acessar Minha Biblioteca e Download ({countdown}s) →
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%', maxWidth: '520px', marginTop: '1rem' }}>
+              <button 
+                type="button" 
+                className={styles.btnReturn}
+                onClick={() => setShowDanfe(true)}
+                style={{ 
+                  background: '#161d26', 
+                  border: '1px solid #00a868', 
+                  color: '#00e58d',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  fontWeight: 600
+                }}
+              >
+                📄 Visualizar DANFE (Nota Fiscal Eletrônica)
+              </button>
+              
+              <button 
+                type="button" 
+                className={styles.btnReturn}
+                onClick={() => navigate('/biblioteca')}
+              >
+                Acessar Minha Biblioteca e Download ({countdown}s) →
+              </button>
+            </div>
           </div>
+        )}
+
+        {/* Modal de Espelho Visual da DANFE */}
+        {showDanfe && issuedInvoice && (
+          <DanfeVisualModal 
+            invoice={issuedInvoice} 
+            onClose={() => setShowDanfe(false)} 
+          />
         )}
       </main>
 

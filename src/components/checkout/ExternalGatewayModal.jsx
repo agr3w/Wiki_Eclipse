@@ -93,7 +93,7 @@ export const ExternalGatewayModal = ({ isOpen, onClose, onPaymentSuccess }) => {
                 {/* Resumo da Cobrança */}
                 <div className={styles.amountCard}>
                   <div>
-                    <div className={styles.merchantName}>Estabelecimento: The Wavem Collective</div>
+                    <div className={styles.merchantName}>Estabelecimento: Collective</div>
                     <div className={styles.orderProduct}>Eclipse: Ecos do Abismo</div>
                   </div>
                   <div className={styles.totalCharge}>

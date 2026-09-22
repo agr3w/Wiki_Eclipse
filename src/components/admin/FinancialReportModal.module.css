@@ -1,0 +1,227 @@
+.reportBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(9, 10, 12, 0.9);
+  backdrop-filter: blur(8px);
+  z-index: 135;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.reportWindow {
+  width: 100%;
+  max-width: 840px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topControls {
+  background-color: var(--bg-main);
+  padding: 1rem 1.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filterLabel {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.filterSelect {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.65rem;
+}
+
+.btnPrintReport {
+  background-color: var(--accent-terracotta);
+  border: 1px solid var(--accent-terracotta);
+  color: #ffffff;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btnPrintReport:hover {
+  background-color: var(--accent-terracotta-hover, #a8472d);
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.closeBtn:hover {
+  color: var(--text-primary);
+}
+
+/* Área do Relatório Impresso */
+.reportViewport {
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.reportSheet {
+  background-color: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.reportHeader {
+  border-bottom: 2px solid var(--border-default);
+  padding-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.companyTitle {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.reportPeriod {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-terracotta);
+  margin-top: 0.25rem;
+}
+
+.kpiSummary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.summaryBox {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summaryLabel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.summaryValue {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Tabela DRE do Relatório */
+.dreTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.dreTable td {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.boldRow td {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.highlightRow td {
+  border-top: 2px solid var(--border-default);
+  border-bottom: 2px solid var(--border-default);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #81c784;
+}
+
+.negative {
+  color: #e57373;
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.positive {
+  color: #81c784;
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.valueCol {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .reportSheet, .reportSheet * {
+    visibility: visible !important;
+  }
+  .reportBackdrop {
+    position: absolute;
+    inset: 0;
+    background: none;
+    padding: 0;
+  }
+  .reportWindow {
+    max-width: 100%;
+    border: none;
+  }
+  .topControls {
+    display: none !important;
+  }
+  .reportSheet {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    padding: 10mm;
+  }
+  .companyTitle, .summaryValue, .boldRow td, .highlightRow td {
+    color: #000000 !important;
+  }
+  .summaryBox {
+    background: none !important;
+    border: 1px solid #000 !important;
+  }
+  .dreTable td {
+    border-bottom: 1px solid #ddd !important;
+  }
+}
