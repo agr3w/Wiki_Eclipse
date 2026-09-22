@@ -408,7 +408,8 @@ export const PagBankGatewayPage = () => {
                   fontWeight: 600
                 }}
               >
-                📄 Visualizar DANFE (Nota Fiscal Eletrônica)
+                <ReceiptLongOutlinedIcon style={{ fontSize: '1.1rem' }} />
+                <span>Visualizar DANFE (Nota Fiscal Eletrônica)</span>
               </button>
               
               <button 

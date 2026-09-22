@@ -218,7 +218,7 @@ export const AdminCosts = () => {
                 <div className={styles.metaStatusSub}>
                   {currentSalesCount >= breakEvenUnits ? (
                     <span style={{ color: '#00d084', fontWeight: 600 }}>
-                      🎉 Ponto de Equilíbrio superado! A partir da {breakEvenUnits + 1}ª cópia, 100% da margem (R$ {unitContributionMargin.toFixed(2)}) é Lucro Operacional Líquido.
+                      Ponto de Equilíbrio superado! A partir da {breakEvenUnits + 1}ª cópia, 100% da margem (R$ {unitContributionMargin.toFixed(2)}) é Lucro Operacional Líquido.
                     </span>
                   ) : (
                     <span>

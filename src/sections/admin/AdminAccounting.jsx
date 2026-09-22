@@ -8,6 +8,7 @@ import {
 import { fetchAdminMetrics, fetchRealTransactions, fetchRealInvoices } from '../../services/adminService';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import { DanfeVisualModal } from '../../components/fiscal/DanfeVisualModal';
 import { FinancialReportModal } from '../../components/admin/FinancialReportModal';
 import { downloadXmlBlob, generateNfeXmlString } from '../../services/fiscalService';
@@ -102,7 +103,8 @@ export const AdminAccounting = () => {
               boxShadow: '0 2px 8px rgba(46, 125, 50, 0.3)'
             }}
           >
-            <span>📊 Relatório Executivo (PDF / DRE)</span>
+            <PictureAsPdfOutlinedIcon style={{ fontSize: '0.95rem' }} />
+            <span>Relatório Executivo (PDF / DRE)</span>
           </button>
           <button 
             onClick={loadData}

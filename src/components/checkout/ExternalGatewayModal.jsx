@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import styles from './ExternalGatewayModal.module.css';
 
 export const ExternalGatewayModal = ({ isOpen, onClose, onPaymentSuccess }) => {
@@ -74,7 +75,10 @@ export const ExternalGatewayModal = ({ isOpen, onClose, onPaymentSuccess }) => {
               <span className={styles.gatewayTitle}>Checkout Seguro</span>
             </div>
             <div className={styles.headerActions}>
-              <span className={styles.securityPill}>🔒 Criptografia TLS 256-bit</span>
+              <span className={styles.securityPill}>
+                <LockOutlinedIcon style={{ fontSize: '0.85rem' }} />
+                <span>Criptografia TLS 256-bit</span>
+              </span>
               <button 
                 type="button" 
                 className={styles.closeBtn} 

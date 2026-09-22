@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { AdminDashboard } from '../../sections/admin/AdminDashboard';
-import { AdminAccounting } from '../../sections/admin/AdminAccounting';
-import { AdminCosts } from '../../sections/admin/AdminCosts';
+import { FinancialCockpit } from '../../sections/admin/FinancialCockpit';
 import { AdminEditor } from '../../sections/admin/AdminEditor';
-import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 import styles from './AdminPage.module.css';
 
 export const AdminPage = () => {
   const { user, isAdmin, openAuthModal } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('finance');
 
   // Proteção de rota para administradores
   if (!user || !isAdmin) {
@@ -48,45 +45,36 @@ export const AdminPage = () => {
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
-            <div className={styles.eyebrow}>Governança Corporativa & TI</div>
+            <div className={styles.eyebrow}>Governança & Consultoria de TI</div>
             <h1 className={styles.title}>Painel de Controle Administrativo</h1>
           </div>
           <div className={styles.systemBadge}>
-            Módulo Integrado: Financeiro, Contábil, Custos & CMS
+            Contabilidade Integrada • NF-e 4.00 • CMS
           </div>
         </header>
 
+        {/* Apenas 2 Abas Direcionadas */}
         <div className={styles.tabRow}>
           <button
-            className={`${styles.tabBtn} ${activeTab === 'dashboard' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('dashboard')}
+            className={`${styles.tabBtn} ${activeTab === 'finance' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('finance')}
           >
-            Dashboard de Métricas & Tráfego
-          </button>
-          <button
-            className={`${styles.tabBtn} ${activeTab === 'costs' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('costs')}
-          >
-            Gestão de Custos & Margem Real
-          </button>
-          <button
-            className={`${styles.tabBtn} ${activeTab === 'accounting' ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab('accounting')}
-          >
-            Módulo Fiscal (NFS-e & Gateway)
+            Controladoria & Gestão Financeira
           </button>
           <button
             className={`${styles.tabBtn} ${activeTab === 'editor' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('editor')}
           >
-            Editor de Conteúdo
+            Catálogo & Gestão de Conteúdo (CMS)
           </button>
         </div>
 
-        {activeTab === 'dashboard' && <AdminDashboard />}
-        {activeTab === 'costs' && <AdminCosts />}
-        {activeTab === 'accounting' && <AdminAccounting />}
-        {activeTab === 'editor' && <AdminEditor />}
+        {/* Renderização Condicional Limpa */}
+        {activeTab === 'finance' ? (
+          <FinancialCockpit />
+        ) : (
+          <AdminEditor />
+        )}
       </div>
     </div>
   );

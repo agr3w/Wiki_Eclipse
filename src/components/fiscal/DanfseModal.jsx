@@ -1,6 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { COMPANY_FISCAL_DATA, downloadXmlFile } from '../../services/fiscalService';
+import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import styles from './DanfseModal.module.css';
 
 export const DanfseModal = ({ invoice, onClose }) => {
@@ -20,12 +24,12 @@ export const DanfseModal = ({ invoice, onClose }) => {
   const vCode = invoice.verificationCode || 'A9F3-481B-902C-71ED';
   const customerName = invoice.customerName || invoice.customer || 'Consumidor Final';
   const customerEmail = invoice.customerEmail || 'cliente.adquirente@gmail.com';
-  const issueDate = invoice.issueDate || new Date().toLocaleDateString('pt-BR');
+  const issueDate = invoice.issueDate || '15/09/2026';
 
   return (
-    <div className={styles.modalBackdrop} onClick={onClose}>
+    <div className={styles.modalOverlay} onClick={onClose}>
       <motion.div 
-        className={styles.modalWindow}
+        className={styles.modalCard}
         onClick={(e) => e.stopPropagation()}
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -34,14 +38,18 @@ export const DanfseModal = ({ invoice, onClose }) => {
         {/* Barra de Ações Administrativas */}
         <div className={styles.actionBar}>
           <div className={styles.actionLeft}>
-            <button className={styles.btnAction} onClick={handlePrint}>
-              🖨️ Imprimir / Salvar PDF
+            <button className={styles.btnAction} onClick={handlePrint} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <PrintOutlinedIcon style={{ fontSize: '1rem' }} />
+              <span>Imprimir / Salvar PDF</span>
             </button>
-            <button className={styles.btnAction} onClick={handleDownloadXml}>
-              📥 Baixar XML ABRASF
+            <button className={styles.btnAction} onClick={handleDownloadXml} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <FileDownloadOutlinedIcon style={{ fontSize: '1rem' }} />
+              <span>Baixar XML ABRASF</span>
             </button>
           </div>
-          <button className={styles.btnClose} onClick={onClose}>✕</button>
+          <button className={styles.btnClose} onClick={onClose} aria-label="Fechar">
+            <CloseOutlinedIcon style={{ fontSize: '1.2rem' }} />
+          </button>
         </div>
 
         {/* Espelho da NFS-e */}
@@ -49,7 +57,9 @@ export const DanfseModal = ({ invoice, onClose }) => {
           <div className={styles.danfsePaper}>
             {/* Cabeçalho Municipal */}
             <div className={styles.govHeader}>
-              <div className={styles.govSeal}>🏛️</div>
+              <div className={styles.govSeal}>
+                <AccountBalanceOutlinedIcon style={{ fontSize: '1.8rem', color: '#555' }} />
+              </div>
               <div className={styles.govTitles}>
                 <h4>Prefeitura Municipal de {COMPANY_FISCAL_DATA.municipio}</h4>
                 <p>Secretaria da Fazenda • Divisão de Fiscalização Tributária</p>

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { COMPANY_FISCAL_DATA } from '../../services/fiscalService';
+import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import styles from './FinancialReportModal.module.css';
 
 export const FinancialReportModal = ({ isOpen, onClose }) => {
@@ -54,10 +56,17 @@ export const FinancialReportModal = ({ isOpen, onClose }) => {
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-              <button className={styles.btnPrintReport} onClick={() => window.print()}>
-                🖨️ Exportar PDF / Imprimir
+              <button 
+                className={styles.btnPrintReport} 
+                onClick={() => window.print()}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <PrintOutlinedIcon style={{ fontSize: '1rem' }} />
+                <span>Exportar PDF / Imprimir</span>
               </button>
-              <button className={styles.closeBtn} onClick={onClose}>✕</button>
+              <button className={styles.closeBtn} onClick={onClose} aria-label="Fechar">
+                <CloseOutlinedIcon style={{ fontSize: '1.2rem' }} />
+              </button>
             </div>
           </div>
 

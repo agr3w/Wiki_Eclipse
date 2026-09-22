@@ -5,6 +5,9 @@ import {
   formatAccessKey, 
   downloadXmlBlob 
 } from '../../services/fiscalService';
+import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import styles from './DanfeVisualModal.module.css';
 
 export const DanfeVisualModal = ({ invoice, onClose }) => {
@@ -38,14 +41,18 @@ export const DanfeVisualModal = ({ invoice, onClose }) => {
         {/* Barra de Ações Rápidas */}
         <div className={styles.actionBar}>
           <div className={styles.actionButtons}>
-            <button className={styles.btnAction} onClick={handlePrint}>
-              🖨️ Imprimir / Salvar PDF
+            <button className={styles.btnAction} onClick={handlePrint} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <PrintOutlinedIcon style={{ fontSize: '1rem' }} />
+              <span>Imprimir / Salvar PDF</span>
             </button>
-            <button className={styles.btnAction} onClick={handleDownloadXml}>
-              📥 Baixar XML NF-e 4.00
+            <button className={styles.btnAction} onClick={handleDownloadXml} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <FileDownloadOutlinedIcon style={{ fontSize: '1rem' }} />
+              <span>Baixar XML NF-e 4.00</span>
             </button>
           </div>
-          <button className={styles.btnClose} onClick={onClose}>✕</button>
+          <button className={styles.btnClose} onClick={onClose} aria-label="Fechar">
+            <CloseOutlinedIcon style={{ fontSize: '1.2rem' }} />
+          </button>
         </div>
 
         {/* Viewport do Documento Fiscal */}
