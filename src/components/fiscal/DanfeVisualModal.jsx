@@ -11,6 +11,15 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import styles from './DanfeVisualModal.module.css';
 
 export const DanfeVisualModal = ({ invoice, onClose }) => {
+  React.useEffect(() => {
+    if (invoice) {
+      document.body.classList.add('is-printing-danfe');
+      return () => {
+        document.body.classList.remove('is-printing-danfe');
+      };
+    }
+  }, [invoice]);
+
   if (!invoice) return null;
 
   const handlePrint = () => {

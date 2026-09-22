@@ -1,0 +1,287 @@
+.chartsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.headerSummary {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.summaryTitle {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.summarySub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.engineBadge {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #81c784;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: rgba(129, 199, 132, 0.1);
+  border: 1px solid rgba(129, 199, 132, 0.25);
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.btnExportReport {
+  background-color: var(--accent-terracotta);
+  border: 1px solid var(--accent-terracotta);
+  color: #ffffff;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(191, 87, 59, 0.25);
+}
+
+.btnExportReport:hover {
+  background-color: var(--accent-terracotta-hover);
+  transform: translateY(-1px);
+}
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.fullWidthCard {
+  grid-column: 1 / -1;
+}
+
+.chartCard {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.cardTitle {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.cardTag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-terracotta);
+  background-color: var(--accent-terracotta-subtle);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.chartContainer {
+  width: 100%;
+  flex: 1;
+  min-height: 290px;
+}
+
+/* Cabeçalho impresso exclusivo para exportação em PDF */
+.printOnlyHeader {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+  .headerSummary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Estilos de Impressão de Alta Resolução para a Banca */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  /* Reset de layout global para prevenir páginas em branco */
+  :global(html),
+  :global(body),
+  :global(#root),
+  :global([class*="adminWrapper"]),
+  :global([class*="adminWrapper"] > [class*="container"]) {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+
+  /* Ocultar cabeçalhos de navegação, abas e ações de tela */
+  :global(header),
+  :global(nav),
+  :global(footer),
+  :global(.navbar),
+  :global([class*="tabRow"]),
+  :global([class*="adminWrapper"] > [class*="container"] > header),
+  .headerActions {
+    display: none !important;
+  }
+
+  /* Cabeçalho impresso oficial corporativo */
+  .printOnlyHeader {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #111;
+    padding-bottom: 0.65rem;
+    margin-bottom: 1rem;
+    color: #000000 !important;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .printBrand h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+    color: #000000 !important;
+    font-family: serif;
+  }
+
+  .printBrand p {
+    font-size: 0.85rem;
+    margin: 0.25rem 0 0 0;
+    color: #222222 !important;
+  }
+
+  .printMeta {
+    text-align: right;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: #333333 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .chartsWrapper {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0.85rem !important;
+  }
+
+  .headerSummary {
+    background: #f8f9fa !important;
+    border: 1px solid #dcdcdc !important;
+    color: #000000 !important;
+    padding: 0.85rem 1.25rem !important;
+    margin-bottom: 1rem !important;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .summaryTitle {
+    color: #000000 !important;
+    font-size: 1.15rem !important;
+  }
+
+  .summarySub {
+    color: #333333 !important;
+    font-size: 0.82rem !important;
+  }
+
+  .chartsGrid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.85rem !important;
+    width: 100% !important;
+  }
+
+  .fullWidthCard {
+    grid-column: 1 / -1 !important;
+  }
+
+  .chartCard {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-bottom: 0.85rem !important;
+    padding: 1rem 1.25rem !important;
+    min-height: 270px !important;
+  }
+
+  .cardHeader {
+    border-bottom: 1px solid #e0e0e0 !important;
+    margin-bottom: 0.6rem !important;
+    padding-bottom: 0.4rem !important;
+  }
+
+  .cardTitle {
+    color: #000000 !important;
+    font-size: 0.98rem !important;
+  }
+
+  .cardTag {
+    background: #f0f0f0 !important;
+    color: #222222 !important;
+    border: 1px solid #cccccc !important;
+    font-size: 0.72rem !important;
+  }
+
+  .chartContainer {
+    height: 225px !important;
+    min-height: 225px !important;
+    width: 100% !important;
+    position: relative !important;
+  }
+}

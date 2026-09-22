@@ -211,27 +211,28 @@
 
 /* Estilos de Impressão (Fiel ao A4) */
 @media print {
-  body * {
+  :global(body.is-printing-danfse) * {
     visibility: hidden;
   }
-  .danfsePaper, .danfsePaper * {
+  :global(body.is-printing-danfse) .danfsePaper,
+  :global(body.is-printing-danfse) .danfsePaper * {
     visibility: visible;
   }
-  .modalBackdrop {
+  :global(body.is-printing-danfse) .modalBackdrop {
     position: absolute;
     inset: 0;
     background: none;
     padding: 0;
   }
-  .modalWindow {
+  :global(body.is-printing-danfse) .modalWindow {
     max-width: 100%;
     border: none;
     box-shadow: none;
   }
-  .actionBar {
+  :global(body.is-printing-danfse) .actionBar {
     display: none;
   }
-  .danfsePaper {
+  :global(body.is-printing-danfse) .danfsePaper {
     width: 100%;
     padding: 0;
     box-shadow: none;

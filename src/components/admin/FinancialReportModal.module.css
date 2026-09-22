@@ -190,38 +190,42 @@
 }
 
 @media print {
-  body * {
+  :global(body.is-printing-financial-report) * {
     visibility: hidden !important;
   }
-  .reportSheet, .reportSheet * {
+  :global(body.is-printing-financial-report) .reportSheet,
+  :global(body.is-printing-financial-report) .reportSheet * {
     visibility: visible !important;
   }
-  .reportBackdrop {
+  :global(body.is-printing-financial-report) .reportBackdrop {
     position: absolute;
     inset: 0;
     background: none;
     padding: 0;
   }
-  .reportWindow {
+  :global(body.is-printing-financial-report) .reportWindow {
     max-width: 100%;
     border: none;
   }
-  .topControls {
+  :global(body.is-printing-financial-report) .topControls {
     display: none !important;
   }
-  .reportSheet {
+  :global(body.is-printing-financial-report) .reportSheet {
     background-color: #ffffff !important;
     color: #000000 !important;
     padding: 10mm;
   }
-  .companyTitle, .summaryValue, .boldRow td, .highlightRow td {
+  :global(body.is-printing-financial-report) .companyTitle,
+  :global(body.is-printing-financial-report) .summaryValue,
+  :global(body.is-printing-financial-report) .boldRow td,
+  :global(body.is-printing-financial-report) .highlightRow td {
     color: #000000 !important;
   }
-  .summaryBox {
+  :global(body.is-printing-financial-report) .summaryBox {
     background: none !important;
     border: 1px solid #000 !important;
   }
-  .dreTable td {
+  :global(body.is-printing-financial-report) .dreTable td {
     border-bottom: 1px solid #ddd !important;
   }
 }

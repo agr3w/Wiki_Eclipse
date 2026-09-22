@@ -13,6 +13,12 @@ import { generateNfeAccessKey, generateNfeXmlString } from '../services/fiscalSe
 
 const AuthContext = createContext({});
 
+const checkIsAdminEmail = (email) => {
+  if (!email) return false;
+  const lower = email.toLowerCase();
+  return lower === 'teste@gmail.com' || lower === 'admin@eclipse.com' || lower.includes('admin');
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +38,7 @@ export const AuthProvider = ({ children }) => {
                 const isAdmin = Boolean(
                   data?.role === 'admin' || 
                   data?.isAdmin === true || 
-                  currentUser.email?.toLowerCase() === 'teste@gmail.com'
+                  checkIsAdminEmail(currentUser.email)
                 );
 
                 setUser({
@@ -43,7 +49,7 @@ export const AuthProvider = ({ children }) => {
                 });
               } else {
                 // Se o documento no Firestore ainda não existe, cria-o automaticamente
-                const isAdmin = currentUser.email?.toLowerCase() === 'teste@gmail.com';
+                const isAdmin = checkIsAdminEmail(currentUser.email);
                 const initialData = {
                   uid: currentUser.uid,
                   displayName: currentUser.displayName || currentUser.email?.split('@')[0] || '',
@@ -57,12 +63,12 @@ export const AuthProvider = ({ children }) => {
                 setUser({ ...currentUser, ...initialData });
               }
             } else {
-              const isAdmin = currentUser.email?.toLowerCase() === 'teste@gmail.com';
+              const isAdmin = checkIsAdminEmail(currentUser.email);
               setUser({ ...currentUser, isAdmin, role: isAdmin ? 'admin' : 'user' });
             }
           } catch (err) {
             console.warn('Erro ao carregar/sincronizar perfil do Firestore:', err);
-            const isAdmin = currentUser.email?.toLowerCase() === 'teste@gmail.com';
+            const isAdmin = checkIsAdminEmail(currentUser.email);
             setUser({ ...currentUser, isAdmin, role: isAdmin ? 'admin' : 'user' });
           }
         } else {
@@ -85,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(res.user, { displayName });
 
-    const isAdmin = email.toLowerCase() === 'teste@gmail.com';
+    const isAdmin = checkIsAdminEmail(email);
     const initialData = {
       uid: res.user.uid,
       displayName,

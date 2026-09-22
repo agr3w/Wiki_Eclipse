@@ -5,28 +5,56 @@ import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import styles from './FinancialReportModal.module.css';
 
-export const FinancialReportModal = ({ isOpen, onClose }) => {
-  const [period, setPeriod] = useState('q3-2026');
+export const FinancialReportModal = ({ 
+  isOpen, 
+  onClose, 
+  initialPeriod = 'q3-2026', 
+  costs = [], 
+  unitsSold = 249 
+}) => {
+  const [period, setPeriod] = useState(initialPeriod);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('is-printing-financial-report');
+      return () => {
+        document.body.classList.remove('is-printing-financial-report');
+      };
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  // Multiplicadores contábeis simulados por período
-  const periodMultipliers = {
-    'q1-2026': { units: 120, overhead: 1245.00 },
-    'q2-2026': { units: 180, overhead: 1245.00 },
-    'q3-2026': { units: 249, overhead: 1245.00 },
-    'q4-2026': { units: 310, overhead: 1245.00 },
-    'anual-2026': { units: 859, overhead: 4980.00 }
-  };
+  // Multiplicador de unidades vendidas baseado no período e dados reais do Firestore
+  const currentUnits = {
+    'q3-2026': unitsSold,
+    'q2-2026': 180,
+    'q1-2026': 120,
+    'anual-2026': unitsSold + 300
+  }[period] || unitsSold;
 
-  const current = periodMultipliers[period] || periodMultipliers['q3-2026'];
-  const gross = current.units * 10.00;
-  const gateway = current.units * 0.95;
-  const taxes = gross * 0.06;
-  const cdn = current.units * 0.10;
-  const totalVariable = gateway + taxes + cdn;
+  const unitGross = 10.00;
+  const gross = currentUnits * unitGross;
+
+  // Custos variáveis dinâmicos do Firestore
+  const variableCosts = costs.filter(c => c.type === 'variable');
+  const unitVarCost = variableCosts.length > 0 
+    ? variableCosts.reduce((acc, c) => acc + Number(c.amount || 0), 0)
+    : 1.65;
+  const totalVariable = unitVarCost * currentUnits;
+
+  // Custos fixos dinâmicos do Firestore
+  const fixedCosts = costs.filter(c => c.type === 'fixed');
+  const monthlyFixedCost = fixedCosts.length > 0
+    ? fixedCosts.reduce((acc, c) => acc + Number(c.amount || 0), 0)
+    : 415.00;
+  
+  // Overhead proporcional ao período selecionado
+  const overhead = period === 'anual-2026' ? monthlyFixedCost * 12 : monthlyFixedCost * 3;
+
   const contributionMargin = gross - totalVariable;
-  const netResult = contributionMargin - current.overhead;
+  const marginPercentage = gross > 0 ? ((contributionMargin / gross) * 100).toFixed(1) : '0.0';
+  const netResult = contributionMargin - overhead;
 
   return (
     <AnimatePresence>
@@ -85,7 +113,7 @@ export const FinancialReportModal = ({ isOpen, onClose }) => {
                 </div>
                 <div style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   Emissão: {new Date().toLocaleDateString('pt-BR')}<br />
-                  Sistema: Eclipse ERP Fiscal
+                  Sistema: Eclipse ERP Fiscal • Fonte Única Firestore
                 </div>
               </header>
 
@@ -93,7 +121,7 @@ export const FinancialReportModal = ({ isOpen, onClose }) => {
               <div className={styles.kpiSummary}>
                 <div className={styles.summaryBox}>
                   <span className={styles.summaryLabel}>Cópias Vendidas</span>
-                  <span className={styles.summaryValue}>{current.units} un</span>
+                  <span className={styles.summaryValue}>{currentUnits} un</span>
                 </div>
                 <div className={styles.summaryBox}>
                   <span className={styles.summaryLabel}>Receita Bruta</span>
@@ -120,37 +148,33 @@ export const FinancialReportModal = ({ isOpen, onClose }) => {
                 <table className={styles.dreTable}>
                   <tbody>
                     <tr className={styles.boldRow}>
-                      <td>(=) RECEITA OPERACIONAL BRUTA ({current.units} licenças a R$ 10,00)</td>
+                      <td>(=) RECEITA OPERACIONAL BRUTA ({currentUnits} licenças a R$ 10,00)</td>
                       <td className={styles.valueCol}>R$ {gross.toFixed(2)}</td>
                     </tr>
-                    <tr>
-                      <td style={{ paddingLeft: '1rem', color: 'var(--text-secondary)' }}>
-                        (-) Intermediação Financeira Adquirente PagBank (4.5% + R$ 0,50 fixo/un)
-                      </td>
-                      <td className={styles.negative}>- R$ {gateway.toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ paddingLeft: '1rem', color: 'var(--text-secondary)' }}>
-                        (-) Tributos Municipais e Simples Nacional s/ Faturamento (6%)
-                      </td>
-                      <td className={styles.negative}>- R$ {taxes.toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ paddingLeft: '1rem', color: 'var(--text-secondary)' }}>
-                        (-) Custos de Banda e Distribuição de Download Cloud (R$ 0,10/un)
-                      </td>
-                      <td className={styles.negative}>- R$ {cdn.toFixed(2)}</td>
-                    </tr>
+
+                    {/* Custos Variáveis Dinâmicos do Firestore */}
+                    {variableCosts.map((c) => (
+                      <tr key={c.id || c.name}>
+                        <td style={{ paddingLeft: '1rem', color: 'var(--text-secondary)' }}>
+                          (-) {c.name} ({c.basis || `R$ ${Number(c.amount).toFixed(2)}/un`})
+                        </td>
+                        <td className={styles.negative}>- R$ {(Number(c.amount) * currentUnits).toFixed(2)}</td>
+                      </tr>
+                    ))}
+
                     <tr className={styles.boldRow}>
-                      <td>(=) MARGEM DE CONTRIBUIÇÃO TOTAL DO PERÍODO (83,5%)</td>
+                      <td>(=) MARGEM DE CONTRIBUIÇÃO TOTAL DO PERÍODO ({marginPercentage}%)</td>
                       <td className={styles.positive}>R$ {contributionMargin.toFixed(2)}</td>
                     </tr>
+
+                    {/* Custos Fixos Agrupados */}
                     <tr>
                       <td style={{ paddingLeft: '1rem', color: 'var(--text-secondary)' }}>
-                        (-) Custos Fixos Operacionais (Overhead: Firebase Blaze, Domínio, Banco e Ferramentas)
+                        (-) Custos Fixos Operacionais ({fixedCosts.length} itens cadastrados no Firestore)
                       </td>
-                      <td className={styles.negative}>- R$ {current.overhead.toFixed(2)}</td>
+                      <td className={styles.negative}>- R$ {overhead.toFixed(2)}</td>
                     </tr>
+
                     <tr className={styles.highlightRow}>
                       <td>(=) RESULTADO OPERACIONAL LÍQUIDO DO PERÍODO</td>
                       <td className={netResult >= 0 ? styles.positive : styles.negative}>

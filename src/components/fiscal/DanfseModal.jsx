@@ -8,6 +8,15 @@ import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlin
 import styles from './DanfseModal.module.css';
 
 export const DanfseModal = ({ invoice, onClose }) => {
+  React.useEffect(() => {
+    if (invoice) {
+      document.body.classList.add('is-printing-danfse');
+      return () => {
+        document.body.classList.remove('is-printing-danfse');
+      };
+    }
+  }, [invoice]);
+
   if (!invoice) return null;
 
   const handlePrint = () => {
